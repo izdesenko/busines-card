@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Илья Здесенко — Software Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:            #0e1319;
+    --bg-grid:       #131a21;
+    --surface:       #151c24;
+    --surface-2:     #10161d;
+    --border:        #232d38;
+    --border-soft:   #1b232c;
+    --text:          #e9edf2;
+    --text-dim:      #97a4b2;
+    --text-faint:    #5b6673;
+    --mint:          #5fe3a4;
+    --mint-dim:      #2c5c47;
+    --amber:         #f2b851;
+    --coral:         #ef7d63;
+
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --font-display: 'Space Grotesk', var(--font-mono);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, var(--bg-grid) 1px, transparent 0) 0 0/28px 28px,
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-mono);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding: 48px 20px 64px;
+  }
+
+  a{ color:inherit; }
+
+  .card{
+    max-width: 860px;
+    margin: 0 auto;
+    display:flex;
+    flex-direction:column;
+    gap: 14px;
+  }
+
+  /* ---------- outer terminal window chrome ---------- */
+  .window{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow: 0 20px 50px -25px rgba(0,0,0,.6);
+  }
+  .titlebar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 14px;
+    background:var(--surface-2);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .traffic{ display:flex; gap:6px; }
+  .traffic span{ width:10px; height:10px; border-radius:50%; display:block; }
+  .traffic .r{ background:#5f4247; }
+  .traffic .y{ background:#5f5237; }
+  .traffic .g{ background:#3a5f47; }
+  .titlebar .path{
+    font-size:12px;
+    color:var(--text-faint);
+    margin-left:4px;
+  }
+
+  /* ---------- tmux status / window-tab bar ---------- */
+  .tmux-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--surface-2);
+    border-bottom:1px solid var(--border-soft);
+    padding: 0 6px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tmux-bar::-webkit-scrollbar{ display:none; }
+
+  .tmux-session{
+    color:var(--mint);
+    font-weight:600;
+    font-size:12px;
+    padding:9px 12px 9px 8px;
+    white-space:nowrap;
+    border-right:1px solid var(--border-soft);
+  }
+
+  .tmux-windows{
+    display:flex;
+    gap:2px;
+    padding: 6px 8px;
+  }
+  .tab{
+    appearance:none;
+    background:transparent;
+    border:none;
+    color:var(--text-faint);
+    font-family:var(--font-mono);
+    font-size:12px;
+    padding:6px 10px;
+    cursor:pointer;
+    white-space:nowrap;
+    border-radius:5px;
+    transition: color .15s ease, background .15s ease;
+  }
+  .tab:hover{ color:var(--text-dim); }
+  .tab[aria-selected="true"]{
+    background:var(--mint);
+    color:#0e1319;
+    font-weight:600;
+  }
+  .tab .idx{ opacity:.65; margin-right:3px; }
+  .tab[aria-selected="true"] .idx{ opacity:.55; }
+  .tab .star{ opacity:0; margin-left:1px; }
+  .tab[aria-selected="true"] .star{ opacity:1; }
+
+  .tmux-right{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:var(--text-faint);
+    white-space:nowrap;
+    padding: 9px 10px 9px 12px;
+    border-left:1px solid var(--border-soft);
+  }
+  .tmux-right .rdot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--mint);
+    display:inline-block;
+    box-shadow: 0 0 0 0 rgba(95,227,164,.6);
+    animation: pulse 2.2s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%   { box-shadow: 0 0 0 0 rgba(95,227,164,.45); }
+    70%  { box-shadow: 0 0 0 8px rgba(95,227,164,0); }
+    100% { box-shadow: 0 0 0 0 rgba(95,227,164,0); }
+  }
+
+  /* ---------- panes ---------- */
+  .panes{ position:relative; }
+  .pane{ display:none; padding: 26px 24px 30px; }
+  .pane.active{
+    display:block;
+    animation: fadein .18s ease;
+  }
+  @keyframes fadein{
+    from{ opacity:0; transform:translateY(3px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .pane.active{ animation:none; }
+    .tmux-right .rdot{ animation:none; }
+    .cursor{ animation:none; }
+  }
+
+  /* ---------- whoami pane ---------- */
+  .hero-line{
+    font-size:14px;
+    color:var(--text-dim);
+    margin:0 0 4px;
+  }
+  .hero-line .prompt{ color:var(--mint); }
+  .name{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(30px, 5.4vw, 46px);
+    letter-spacing:-0.01em;
+    margin: 6px 0 4px;
+  }
+  .role{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size: clamp(15px, 2.4vw, 18px);
+    color:var(--amber);
+    margin: 0 0 22px;
+  }
+  .tagline{
+    font-size:13.5px;
+    color:var(--text-dim);
+    border-left:2px solid var(--border);
+    padding-left:14px;
+    max-width:52ch;
+  }
+  .next-cmd{ margin-top:22px; }
+  .cursor{
+    display:inline-block;
+    width:.5em; height:.85em;
+    background:var(--mint);
+    animation: blink 1.1s step-end infinite;
+    transform:translateY(2px);
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* ---------- htop pane ---------- */
+  .htop-summary{
+    font-size:12px;
+    color:var(--text-faint);
+    margin: 0 0 4px;
+  }
+  .htop-mem{
+    font-size:12px;
+    color:var(--text-faint);
+    margin: 2px 0 18px;
+  }
+  .htop-mem .bar-fill{ color:var(--mint); }
+  .htop-mem .bar-empty{ color:var(--border); }
+
+  .proc-head{
+    display:grid;
+    grid-template-columns: 46px 130px 1fr 64px;
+    gap:14px;
+    padding: 0 10px 8px;
+    font-size:11px;
+    letter-spacing:.05em;
+    color:var(--text-faint);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .proc{
+    display:grid;
+    grid-template-columns: 46px 130px 1fr 64px;
+    align-items:center;
+    gap:14px;
+    padding: 10px 10px;
+    border-top:1px solid var(--border-soft);
+    font-size:13px;
+    transition: background .15s ease;
+  }
+  .proc:first-of-type{ border-top:none; }
+  .proc:hover{ background:rgba(95,227,164,.04); }
+  .proc-pid{ color:var(--text-faint); }
+  .proc-name{ color:var(--mint); font-weight:600; }
+  .proc-name .args{ color:var(--text-faint); font-weight:400; display:block; font-size:11.5px; margin-top:2px; }
+  .proc-cpu{ display:flex; align-items:center; gap:8px; }
+  .proc-cpu .bar{
+    position:relative;
+    flex:1;
+    height:6px;
+    background:var(--border-soft);
+    border-radius:3px;
+    overflow:hidden;
+    min-width:60px;
+  }
+  .proc-cpu .bar > span{
+    position:absolute; left:0; top:0; bottom:0;
+    background: linear-gradient(90deg, var(--mint), var(--amber));
+    border-radius:3px;
+  }
+  .proc-cpu .pct{ color:var(--text-dim); font-size:12px; white-space:nowrap; width:34px; }
+  .proc-state{ text-align:right; font-size:12px; white-space:nowrap; }
+  .proc-state.R{ color:var(--mint); }
+  .proc-state.S{ color:var(--amber); }
+
+  @media (max-width:560px){
+    .proc-head{ display:none; }
+    .proc{ grid-template-columns: 1fr auto; grid-template-rows:auto auto; row-gap:4px; }
+    .proc-pid{ display:none; }
+    .proc-cpu{ grid-column:1 / -1; }
+  }
+
+  /* ---------- sendmail pane ---------- */
+  .mail-line{
+    font-size:14px;
+    color:var(--text-dim);
+    margin:0 0 18px;
+  }
+  .mail-line .prompt{ color:var(--mint); }
+  .queue{ display:flex; flex-direction:column; }
+  .mail{
+    display:grid;
+    grid-template-columns: 78px 96px 1fr auto auto;
+    align-items:center;
+    gap:12px;
+    padding: 13px 10px;
+    border-top:1px solid var(--border-soft);
+    font-size:13px;
+  }
+  .mail:first-child{ border-top:none; }
+  .mail-queue{ color:var(--coral); }
+  .mail-key{ color:var(--text-faint); font-size:12px; }
+  .mail-to{
+    color:var(--text);
+    text-decoration:none;
+    border-bottom:1px solid transparent;
+    transition: border-color .15s ease, color .15s ease;
+    word-break:break-all;
+  }
+  .mail-to:hover, .mail-to:focus-visible{ color:var(--mint); border-bottom-color:var(--mint-dim); }
+  .mail-status{ color:var(--mint); font-size:12px; white-space:nowrap; }
+  .btn{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--text-dim);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:6px 10px;
+    cursor:pointer;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+    white-space:nowrap;
+  }
+  .btn:hover{ border-color:var(--mint-dim); color:var(--mint); }
+  .btn:active{ transform:translateY(1px); }
+  .btn.copied{ color:var(--mint); border-color:var(--mint-dim); background:rgba(95,227,164,.08); }
+
+  @media (max-width:640px){
+    .mail{ grid-template-columns: 1fr auto; grid-template-rows:auto auto auto; row-gap:4px; }
+    .mail-queue{ order:1; }
+    .mail-key{ display:none; }
+    .mail-to{ grid-column:1 / -1; order:2; }
+    .mail-status{ order:3; }
+  }
+
+  a:focus-visible, button:focus-visible{
+    outline: 2px solid var(--mint);
+    outline-offset: 2px;
+  }
+
+  /* ---------- footer ---------- */
+  .footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:11px;
+    color:var(--text-faint);
+    padding: 4px 4px 0;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="window">
+    <div class="titlebar">
+      <div class="traffic"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+      <div class="path">ilya@dev — tmux</div>
+    </div>
+
+    <div class="tmux-bar">
+      <div class="tmux-session">[ilya-zdesenko]</div>
+      <div class="tmux-windows" role="tablist" aria-label="tmux windows">
+        <button class="tab" role="tab" id="tab-whoami" aria-selected="true" aria-controls="pane-whoami" data-target="pane-whoami"><span class="idx">0:</span>whoami<span class="star">*</span></button>
+        <button class="tab" role="tab" id="tab-htop" aria-selected="false" aria-controls="pane-htop" data-target="pane-htop" tabindex="-1"><span class="idx">1:</span>htop<span class="star">*</span></button>
+        <button class="tab" role="tab" id="tab-sendmail" aria-selected="false" aria-controls="pane-sendmail" data-target="pane-sendmail" tabindex="-1"><span class="idx">2:</span>sendmail<span class="star">*</span></button>
+      </div>
+      <div class="tmux-right"><span class="rdot"></span><span id="clock">00:00</span></div>
+    </div>
+
+    <div class="panes">
+
+      <!-- PANE 0: whoami -->
+      <div class="pane active" id="pane-whoami" role="tabpanel" aria-labelledby="tab-whoami">
+        <p class="hero-line"><span class="prompt">$</span> whoami</p>
+        <div class="name">Илья Здесенко</div>
+        <p class="role">Software Developer</p>
+
+        <p class="hero-line" style="margin-top:6px;"><span class="prompt">$</span> cat about.txt</p>
+        <p class="tagline">
+          Чиню код, укрощаю конфиги, перевожу с фронтенда на бэкенд и на человеческий.
+          Разработчик на все руки: если что-то не работает — разберусь.
+          Если у вас всё работает — мне становится подозрительно.
+        </p>
+
+        <p class="hero-line next-cmd"><span class="prompt">$</span> <span class="cursor"></span></p>
+      </div>
+
+      <!-- PANE 1: htop -->
+      <div class="pane" id="pane-htop" role="tabpanel" aria-labelledby="tab-htop" hidden>
+        <p class="htop-summary">Tasks: 7 total, 7 running · Load average: 1.00, 0.98, 1.00</p>
+        <p class="htop-mem">Mem <span class="bar-fill">[||||||||||||</span><span class="bar-empty">||||||]</span> занят делом</p>
+
+        <div class="proc-head">
+          <span>PID</span><span>COMMAND</span><span>CPU</span><span style="text-align:right;">STATE</span>
+        </div>
+        <div id="processes"></div>
+      </div>
+
+      <!-- PANE 2: sendmail -->
+      <div class="pane" id="pane-sendmail" role="tabpanel" aria-labelledby="tab-sendmail" hidden>
+        <p class="mail-line"><span class="prompt">$</span> sendmail -v -bs</p>
+        <div class="queue" id="queue"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>container: ilya-zdesenko:latest</span>
+    <span>restart: unless-stopped</span>
+  </div>
+
+</div>
+
+<script>
+  // ---------- data ----------
+  const processes = [
+    { pid:1, name:"git",        args:"log --all --since=forever",   cpu:100, state:"R" },
+    { pid:2, name:"typescript", args:"--strict --noImplicitAny",     cpu:92,  state:"R" },
+    { pid:3, name:"nodejs",     args:"--max-old-space-size=∞",       cpu:61,  state:"R" },
+    { pid:4, name:"nestjs",     args:"@Injectable() everything",     cpu:78,  state:"R" },
+    { pid:5, name:"prisma",     args:"migrate deploy",               cpu:45,  state:"R" },
+    { pid:6, name:"graphql",    args:"resolve(root, args, ctx)",     cpu:84,  state:"R" },
+    { pid:7, name:"docker",     args:"compose up -d",                cpu:15,  state:"S" },
+  ];
+
+  const procEl = document.getElementById("processes");
+  processes.forEach(p => {
+    const row = document.createElement("div");
+    row.className = "proc";
+    row.innerHTML = `
+      <span class="proc-pid">${p.pid}</span>
+      <span class="proc-name">${p.name}<span class="args">${p.args}</span></span>
+      <span class="proc-cpu"><span class="bar"><span style="width:${p.cpu}%"></span></span><span class="pct">${p.cpu}%</span></span>
+      <span class="proc-state ${p.state}">${p.state === "R" ? "running" : "sleeping"}</span>
+    `;
+    procEl.appendChild(row);
+  });
+
+  const mails = [
+    { queue:"3F2A91", key:"telegram", to:"@izdesenko",            href:"https://t.me/izdesenko",        copy:"@izdesenko",                     action:"copy" },
+    { queue:"8B10C4", key:"email",    to:"iplugin@gmail.com",     href:"mailto:iplugin@gmail.com",      copy:"iplugin@gmail.com",              action:"copy" },
+    { queue:"E00D7A", key:"github",   to:"github.com/izdesenko",  href:"https://github.com/izdesenko",  copy:"https://github.com/izdesenko",   action:"open" },
+  ];
+
+  const queueEl = document.getElementById("queue");
+  mails.forEach(m => {
+    const row = document.createElement("div");
+    row.className = "mail";
+    row.innerHTML = `
+      <span class="mail-queue">${m.queue}</span>
+      <span class="mail-key">${m.key}</span>
+      <a class="mail-to" href="${m.href}" target="_blank" rel="noopener">${m.to}</a>
+      <span class="mail-status">250 delivered</span>
+      <button class="btn" data-copy="${m.copy}">${m.action === "open" ? "open ↗" : "copy"}</button>
+    `;
+    queueEl.appendChild(row);
+  });
+
+  document.querySelectorAll(".btn[data-copy]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const value = btn.getAttribute("data-copy");
+      try { await navigator.clipboard.writeText(value); } catch (e) {}
+      const original = btn.textContent;
+      btn.textContent = "copied ✓";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove("copied");
+      }, 1400);
+    });
+  });
+
+  // ---------- tab switching ----------
+  const tabs = Array.from(document.querySelectorAll(".tab"));
+  function activate(tab, focus) {
+    tabs.forEach(t => {
+      const selected = t === tab;
+      t.setAttribute("aria-selected", selected ? "true" : "false");
+      t.tabIndex = selected ? 0 : -1;
+      const pane = document.getElementById(t.getAttribute("data-target"));
+      if (selected) {
+        pane.hidden = false;
+        pane.classList.add("active");
+      } else {
+        pane.hidden = true;
+        pane.classList.remove("active");
+      }
+    });
+    if (focus) tab.focus();
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => activate(tab, false));
+    tab.addEventListener("keydown", (e) => {
+      let idx = null;
+      if (e.key === "ArrowRight") idx = (i + 1) % tabs.length;
+      if (e.key === "ArrowLeft") idx = (i - 1 + tabs.length) % tabs.length;
+      if (e.key === "Home") idx = 0;
+      if (e.key === "End") idx = tabs.length - 1;
+      if (idx !== null) { e.preventDefault(); activate(tabs[idx], true); }
+    });
+  });
+
+  // ---------- live clock ----------
+  function tick() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    document.getElementById("clock").textContent = `${hh}:${mm}`;
+  }
+  tick();
+  setInterval(tick, 1000 * 15);
+</script>
+
+</body>
+</html>
