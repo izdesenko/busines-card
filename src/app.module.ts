@@ -38,7 +38,7 @@ import { buildAdminModuleOptions } from './admin/admin.config';
       AdminModule.createAdminAsync({
         imports: [PrismaModule, AuthModule, ConfigModule],
         inject: [PrismaService, AuthService, ConfigService],
-        useFactory: buildAdminModuleOptions,
+        useFactory: buildAdminModuleOptions as any,
       }),
     ),
   ],

@@ -12,7 +12,7 @@
       "dom",
       "esnext"
     ],
-    "module": "commonjs",
+    "module": "NodeNext",
     "noFallthroughCasesInSwitch": false,
     "noImplicitAny": true,
     "outDir": "./dist",
@@ -23,5 +23,6 @@
     "strictBindCallApply": false,
     "strictNullChecks": true,
     "target": "esnext",
+    "moduleResolution": "nodenext"
   }
 }
