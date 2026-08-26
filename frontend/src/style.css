@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg text-text;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image: radial-gradient(circle at 1px 1px, #131a21 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply font-mono text-[11.5px] text-dim bg-surface2 border border-border rounded-md px-2.5 py-1.5 transition-colors whitespace-nowrap;
+  }
+  .btn:hover:not(:disabled) {
+    @apply border-mintDim text-mint;
+  }
+  .btn:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+}
+
+/* Переход между табами tmux-панели */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(3px);
+}
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Toast-уведомления */
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.2s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-blink,
+  .animate-statusPulse {
+    animation: none !important;
+  }
+  .fade-enter-active,
+  .fade-leave-active,
+  .toast-enter-active,
+  .toast-leave-active {
+    transition: none !important;
+  }
+}
