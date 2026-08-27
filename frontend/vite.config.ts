@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,14 +11,11 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
-    // Шаг 8 из ТЗ: проксируем GraphQL-запросы на бэкенд, чтобы в dev-режиме
-    // не упираться в CORS/разные origin'ы. Бэкенд к тому же уже включает
-    // app.enableCors() в main.ts, так что прокси — это скорее удобство
-    // (относительные URL, единый origin), а не обязательное условие.
+    port: 3400,
+
     proxy: {
-      '/graphql': {
-        target: 'http://localhost:3000',
+      '/api': {
+        target: 'http://localhost:3300',
         changeOrigin: true,
       },
     },

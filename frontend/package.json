@@ -1,11 +1,11 @@
 {
   "name": "dev-card-frontend",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "npm run type-check && vite build",
     "preview": "vite preview",
     "type-check": "vue-tsc -b"
   },
@@ -16,6 +16,7 @@
     "vue": "^3.4.38"
   },
   "devDependencies": {
+    "@types/node": "^26.3.0",
     "@vitejs/plugin-vue": "^5.1.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",

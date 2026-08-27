@@ -9,10 +9,10 @@ interface GetTextContentsResponse {
 
 export const useTextContentStore = defineStore('textContent', {
   state: () => ({
-    items: [] as TextContent[],
-    loading: false,
-    loaded: false,
     error: null as string | null,
+    items: [] as TextContent[],
+    loaded: false,
+    loading: false,
   }),
   getters: {
     map(state): Record<string, string> {
@@ -22,11 +22,12 @@ export const useTextContentStore = defineStore('textContent', {
   actions: {
     async fetch() {
       if (this.loaded || this.loading) return;
-      this.loading = true;
       this.error = null;
+      this.loading = true;
       try {
-        const data = await gqlClient.request<GetTextContentsResponse>(GET_TEXT_CONTENTS);
-        this.items = data.getTextContents;
+        const { getTextContents } =
+          await gqlClient.request<GetTextContentsResponse>(GET_TEXT_CONTENTS);
+        this.items = getTextContents;
         this.loaded = true;
       } catch (e) {
         this.error = e instanceof Error ? e.message : 'Не удалось загрузить контент';

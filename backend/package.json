@@ -1,6 +1,6 @@
 {
   "name": "dev-card-backend",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Backend для сайта-визитки: NestJS + Prisma + SQLite + AdminJS",
   "private": true,
   "scripts": {

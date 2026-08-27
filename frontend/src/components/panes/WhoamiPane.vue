@@ -1,23 +1,30 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useTextContentStore } from '@/stores/textContent';
+  import { onMounted } from 'vue';
+  import { useTextContentStore } from '@/stores/textContent';
 
-const textContent = useTextContentStore();
-onMounted(() => textContent.fetch());
+  const textContent = useTextContentStore();
+  onMounted(() => textContent.fetch());
 </script>
 
 <template>
   <div class="p-6 sm:p-7">
     <template v-if="textContent.error">
       <p class="text-sm text-coral">{{ textContent.error }}</p>
-      <button type="button" class="btn mt-3" @click="textContent.fetch()">повторить</button>
+      <button
+        type="button"
+        class="btn mt-3"
+        @click="textContent.fetch()"
+      >повторить</button>
     </template>
 
     <template v-else>
       <p class="text-sm text-dim mb-1"><span class="text-mint">$</span> whoami</p>
 
       <div class="font-display font-bold text-3xl sm:text-4xl md:text-[46px] -tracking-tight mb-1 min-h-[1.2em]">
-        <span v-if="textContent.loading && !textContent.loaded" class="text-faint">…</span>
+        <span
+          v-if="textContent.loading && !textContent.loaded"
+          class="text-faint"
+        >…</span>
         <span v-else>{{ textContent.get('hero_title', 'Илья Здесенко') }}</span>
       </div>
 

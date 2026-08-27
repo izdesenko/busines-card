@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import type { TmuxTab } from '@/types';
+  import { onBeforeUnmount, onMounted, ref } from 'vue';
+  import type { TmuxTab } from '@/types';
 
-defineProps<{
-  tabs: TmuxTab[];
-  modelValue: string;
-}>();
+  defineProps<{
+    tabs: TmuxTab[];
+    modelValue: string;
+  }>();
 
-const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>();
+  const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>();
 
-function select(id: string) {
-  emit('update:modelValue', id);
-}
+  function select(id: string) {
+    emit('update:modelValue', id);
+  }
 
-const clock = ref('');
-let timer: ReturnType<typeof setInterval> | undefined;
+  const clock = ref('');
+  let timer: ReturnType<typeof setInterval> | undefined;
 
-function tick() {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  clock.value = `${hh}:${mm}`;
-}
+  function tick() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    clock.value = `${hh}:${mm}`;
+  }
 
-onMounted(() => {
-  tick();
-  timer = setInterval(tick, 15_000);
-});
-onBeforeUnmount(() => {
-  if (timer) clearInterval(timer);
-});
+  onMounted(() => {
+    tick();
+    timer = setInterval(tick, 15_000);
+  });
+  onBeforeUnmount(() => {
+    if (timer) clearInterval(timer);
+  });
 </script>
 
 <template>
@@ -50,7 +50,11 @@ onBeforeUnmount(() => {
         [ilya-zdesenko]
       </span>
 
-      <div class="flex gap-0.5 px-2 py-1.5" role="tablist" aria-label="tmux windows">
+      <div
+        class="flex gap-0.5 px-2 py-1.5"
+        role="tablist"
+        aria-label="tmux windows"
+      >
         <button
           v-for="(tab, i) in tabs"
           :key="tab.id"
@@ -58,14 +62,13 @@ onBeforeUnmount(() => {
           role="tab"
           :aria-selected="tab.id === modelValue"
           class="text-xs font-mono px-2.5 py-1.5 rounded whitespace-nowrap transition-colors"
-          :class="
-            tab.id === modelValue
-              ? 'bg-mint text-bg font-semibold'
-              : 'text-faint hover:text-dim'
-          "
+          :class="tab.id === modelValue
+            ? 'bg-mint text-bg font-semibold'
+            : 'text-faint hover:text-dim'
+            "
           @click="select(tab.id)"
         >
-          <span class="opacity-60">{{ i }}:</span>{{ tab.label }}<span v-if="tab.id === modelValue">*</span>
+          <span class="opacity-60">{{ i }}:</span>{{ tab.label }} <span v-if="tab.id === modelValue">*</span>
         </button>
       </div>
 
