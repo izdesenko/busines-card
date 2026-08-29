@@ -1,6 +1,31 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../users/users.service';
+import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import type { ConfigService } from '@nestjs/config';
+import type { PrismaService } from '../prisma/prisma.service';
+import type { UsersService } from '../users/users.service';
+
+const DEFAULT_CONTACTS = [
+  {
+    type: 'telegram',
+    label: 'Telegram',
+    value: '@ilyazdesenko',
+    url: 'https://t.me/ilyazdesenko',
+    order: 1,
+  },
+  {
+    type: 'email',
+    label: 'Email',
+    value: 'ilya@zdesenko.dev',
+    url: 'mailto:ilya@zdesenko.dev',
+    order: 2,
+  },
+  {
+    type: 'github',
+    label: 'GitHub',
+    value: 'github.com/ilyazdesenko',
+    url: 'https://github.com/ilyazdesenko',
+    order: 3,
+  },
+];
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -8,26 +33,32 @@ export class SeedService implements OnModuleInit {
 
   constructor(
     private readonly usersService: UsersService,
+    private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {}
 
   /**
-   * Шаг 5 из ТЗ: при старте приложения проверяем таблицу User.
-   * Если она пуста — создаём администратора по умолчанию из .env.
+   * При старте приложения заполняем пустые таблицы дефолтными данными.
    */
   async onModuleInit() {
-    const existing = await this.usersService.count();
-    if (existing > 0) return;
+    // Создаём администратора по умолчанию, если таблица User пуста.
+    const userCount = await this.usersService.count();
+    if (userCount === 0) {
+      const username = this.config.get<string>('ADMIN_USERNAME', 'admin');
+      const password = this.config.get<string>('ADMIN_PASSWORD', 'admin');
+      await this.usersService.create(username, password);
+      this.logger.warn(
+        `Таблица User была пуста — создан администратор по умолчанию: "${username}". ` +
+          'Обязательно смените пароль после первого входа в /admin ' +
+          '(переменные ADMIN_USERNAME / ADMIN_PASSWORD в .env).',
+      );
+    }
 
-    const username = this.config.get<string>('ADMIN_USERNAME', 'admin');
-    const password = this.config.get<string>('ADMIN_PASSWORD', 'admin123');
-
-    await this.usersService.create(username, password);
-
-    this.logger.warn(
-      `Таблица User была пуста — создан администратор по умолчанию: "${username}". ` +
-        'Обязательно смените пароль после первого входа в /admin ' +
-        '(переменные ADMIN_USERNAME / ADMIN_PASSWORD в .env).',
-    );
+    // Заполняем контакты по умолчанию, если таблица Contact пуста.
+    const contactCount = await this.prisma.contact.count();
+    if (contactCount === 0) {
+      await this.prisma.contact.createMany({ data: DEFAULT_CONTACTS });
+      this.logger.log('Заполнена таблица Contact дефолтными данными.');
+    }
   }
 }

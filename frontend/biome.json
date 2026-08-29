@@ -1,16 +1,24 @@
 {
   "$schema": "https://biomejs.dev/schemas/latest/schema.json",
-  "extends": ["../biome.json"],
+  "extends": "//",
   "overrides": [
     {
       "includes": ["**/*.vue"],
       "linter": {
         "rules": {
           "correctness": {
-            "useExhaustiveDependencies": "off"
+            "useExhaustiveDependencies": "off",
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
           }
         }
       }
     }
-  ]
+  ],
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": {
+      "enabled": true
+    }
+  }
 }

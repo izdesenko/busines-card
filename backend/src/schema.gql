@@ -1,0 +1,76 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type ContactFormResultType {
+  """true, если отправлено в Telegram; false, если только залогировано"""
+  delivered: Boolean!
+}
+
+type ContactType {
+  id: Int!
+  label: String!
+  order: Int!
+  type: String!
+  url: String
+  value: String!
+}
+
+input CreateContactInput {
+  email: String! = ""
+  message: String! = ""
+  name: String! = ""
+  phone: String
+}
+
+type Mutation {
+  """Отправляет сообщение с формы обратной связи в Telegram"""
+  sendContactForm(input: CreateContactInput!): ContactFormResultType!
+}
+
+type ProjectType {
+  description: String!
+  githubLink: String
+  id: Int!
+  liveLink: String
+  order: Int!
+  technologies: String!
+  title: String!
+}
+
+type Query {
+  """
+  Список контактов для секции "Контакты"
+  """
+  getContacts: [ContactType!]!
+
+  """Список проектов для портфолио"""
+  getProjects: [ProjectType!]!
+
+  """Список навыков, сгруппированных по категориям"""
+  getSkills: [SkillGroup!]!
+
+  """Список текстов для страниц (ключ → значение)"""
+  getTextContents: [TextContentType!]!
+}
+
+type Skill {
+  id: Int!
+
+  """Уровень владения, 1..100"""
+  level: Int!
+  name: String!
+}
+
+type SkillGroup {
+  """Backend | Frontend | Devops | Other"""
+  category: String!
+  skills: [Skill!]!
+}
+
+type TextContentType {
+  key: String!
+
+  """Может содержать HTML"""
+  value: String!
+}

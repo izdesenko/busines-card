@@ -1,35 +1,36 @@
 <script setup lang="ts">
-  import { onBeforeUnmount, onMounted, ref } from 'vue';
-  import type { TmuxTab } from '@/types';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import type { TmuxTab } from '@/types';
 
-  defineProps<{
-    tabs: TmuxTab[];
-    modelValue: string;
-  }>();
+defineProps<{
+  tabs: TmuxTab[];
+  modelValue: string;
+}>();
 
-  const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>();
+const emit = defineEmits<(e: 'update:modelValue', value: string) => void>();
 
-  function select(id: string) {
-    emit('update:modelValue', id);
-  }
+function select(id: string) {
+  emit('update:modelValue', id);
+}
 
-  const clock = ref('');
-  let timer: ReturnType<typeof setInterval> | undefined;
+const clock = ref<string>('');
+let timer: ReturnType<typeof setTimeout> | undefined;
 
-  function tick() {
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    clock.value = `${hh}:${mm}`;
-  }
+function tick() {
+  clock.value = getCurrentTime();
+  timer = setTimeout(tick, 30_000);
+  return timer;
+}
 
-  onMounted(() => {
-    tick();
-    timer = setInterval(tick, 15_000);
-  });
-  onBeforeUnmount(() => {
-    if (timer) clearInterval(timer);
-  });
+function getCurrentTime() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
+onMounted(tick);
+onBeforeUnmount(() => timer && clearTimeout(timer));
 </script>
 
 <template>

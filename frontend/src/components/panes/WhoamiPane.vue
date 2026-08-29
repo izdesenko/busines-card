@@ -1,9 +1,9 @@
 <script setup lang="ts">
-  import { onMounted } from 'vue';
-  import { useTextContentStore } from '@/stores/textContent';
+import { onMounted } from 'vue';
+import { useTextContentStore } from '@/stores/textContent';
 
-  const textContent = useTextContentStore();
-  onMounted(() => textContent.fetch());
+const textContent = useTextContentStore();
+onMounted(() => textContent.fetch());
 </script>
 
 <template>
@@ -34,12 +34,6 @@
 
       <p class="text-sm text-dim mb-1 mt-1.5"><span class="text-mint">$</span> cat about.txt</p>
 
-      <!--
-        Контент about_me приходит из AdminJS уже как HTML-строка (см. ТЗ, п.2) —
-        рендерим через v-html. Источник доверенный (редактируется только
-        администратором сайта через AdminJS), поэтому это осознанный компромисс,
-        а не рендеринг произвольного пользовательского ввода.
-      -->
       <div
         class="text-[13.5px] leading-relaxed text-dim border-l-2 border-border pl-3.5 max-w-[52ch] [&_p]:mb-2 last:[&_p]:mb-0"
         v-html="textContent.get('about_me', '')"

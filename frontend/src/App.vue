@@ -1,21 +1,21 @@
 <script setup lang="ts">
-  import { ref } from 'vue';
-  import TmuxWindow from '@/components/TmuxWindow.vue';
-  import type { TmuxTab } from '@/types';
-  import WhoamiPane from '@/components/panes/WhoamiPane.vue';
-  import HtopPane from '@/components/panes/HtopPane.vue';
-  import ProjectsPane from '@/components/panes/ProjectsPane.vue';
-  import SendmailPane from '@/components/panes/SendmailPane.vue';
-  import ToastHost from '@/components/ui/ToastHost.vue';
+import { ref } from 'vue';
+import HtopPane from '@/components/panes/HtopPane.vue';
+import ProjectsPane from '@/components/panes/ProjectsPane.vue';
+import SendmailPane from '@/components/panes/SendmailPane.vue';
+import WhoamiPane from '@/components/panes/WhoamiPane.vue';
+import TmuxWindow from '@/components/TmuxWindow.vue';
+import ToastHost from '@/components/ui/ToastHost.vue';
+import type { TmuxTab } from '@/types';
 
-  const tabs: TmuxTab[] = [
-    { id: 'whoami', label: 'id' },
-    { id: 'htop', label: 'htop' },
-    { id: 'projects', label: 'ls -la ~/work' },
-    { id: 'sendmail', label: 'sendmail' },
-  ];
+const tabs: TmuxTab[] = [
+  { id: 'whoami', label: 'id' },
+  { id: 'htop', label: 'htop' },
+  { id: 'projects', label: 'ls -la ~/work' },
+  { id: 'sendmail', label: 'sendmail' },
+];
 
-  const active = ref('whoami');
+const active = ref('whoami');
 </script>
 
 <template>

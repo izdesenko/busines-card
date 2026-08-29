@@ -1,9 +1,9 @@
+import { Database, getModelByName, Resource } from '@adminjs/prisma';
+import type { ConfigService } from '@nestjs/config';
 import AdminJS from 'adminjs';
-import { Database, Resource, getModelByName } from '@adminjs/prisma';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
-import { AuthService } from '../auth/auth.service';
+import type { AuthService } from '../auth/auth.service';
+import type { PrismaService } from '../prisma/prisma.service';
 
 // Регистрируем Prisma-адаптер один раз при загрузке модуля.
 AdminJS.registerAdapter({ Database, Resource });
@@ -18,19 +18,16 @@ async function hashPasswordBeforeSave(request: any) {
 }
 
 /**
- * Конфигурация AdminJS: подключает Prisma-модели Skill, Project, TextContent
- * и User как ресурсы с автосгенерированным CRUD UI, и защищает /admin
- * логином/паролем через AuthService (bcrypt-проверка, шаг 4 из ТЗ).
+ * Конфигурация AdminJS: подключает Prisma-модели Skill, Project, TextContent,
+ * Contact и User как ресурсы с автосгенерированным CRUD UI, и защищает /admin
+ * логином/паролем через AuthService (bcrypt-проверка).
  */
 export function buildAdminModuleOptions(
   prisma: PrismaService,
   authService: AuthService,
   config: ConfigService,
 ) {
-  const cookieSecret = config.get<string>(
-    'ADMIN_COOKIE_SECRET',
-    'default-cookie-secret-change-me',
-  );
+  const cookieSecret = config.get<string>('ADMIN_COOKIE_SECRET', 'default-cookie-secret-change-me');
 
   return {
     adminJsOptions: {
@@ -66,6 +63,12 @@ export function buildAdminModuleOptions(
           resource: { model: getModelByName('TextContent'), client: prisma },
           options: {
             navigation: { name: 'Контент сайта', icon: 'FileText' },
+          },
+        },
+        {
+          resource: { model: getModelByName('Contact'), client: prisma },
+          options: {
+            navigation: { name: 'Контент сайта', icon: 'Email' },
           },
         },
         {

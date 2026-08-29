@@ -1,6 +1,10 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CreateContactDto } from './dto/create-contact.dto';
+import type { ConfigService } from '@nestjs/config';
+import type { CreateContactDto } from './dto/create-contact.dto';
+
+export interface SendContactResult {
+  delivered: boolean;
+}
 
 @Injectable()
 export class ContactService {
@@ -8,7 +12,7 @@ export class ContactService {
 
   constructor(private readonly config: ConfigService) {}
 
-  async sendToTelegram(dto: CreateContactDto) {
+  async sendToTelegram(dto: CreateContactDto): Promise<SendContactResult> {
     const token = this.config.get<string>('TELEGRAM_BOT_TOKEN');
     const chatId = this.config.get<string>('TELEGRAM_CHAT_ID');
 
@@ -33,8 +37,6 @@ export class ContactService {
 
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
-    // Требует Node.js 18+ (глобальный fetch). Для более старых версий
-    // Node установите node-fetch или undici и замените вызов ниже.
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

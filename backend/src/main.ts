@@ -1,6 +1,6 @@
 import 'reflect-metadata';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
 import session from 'express-session';
 import passport from 'passport';
 import { AppModule } from './app.module';
@@ -33,11 +33,11 @@ async function bootstrap() {
 
   app.enableCors();
 
-  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  const port = process.env.PORT ? Number(process.env.PORT) : 3300;
   await app.listen(port);
 
-  logger.log(`🚀 API запущено:  http://localhost:${port}/api`);
-  logger.log(`🛠  Admin-панель:  http://localhost:${port}/admin`);
+  logger.log(`🚀 Сервер запущен:     http://localhost:${port}`);
+  logger.log(`🛠  Admin-панель:     http://localhost:${port}/admin`);
+  logger.log(`🔮 GraphQL endpoint: http://localhost:${port}/api/graphql`);
 }
-
 bootstrap();

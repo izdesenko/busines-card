@@ -1,11 +1,25 @@
 {
   "$schema": "https://biomejs.dev/schemas/latest/schema.json",
-  "extends": ["../biome.json"],
+  "extends": "//",
   "linter": {
+    "enabled": true,
     "rules": {
       "style": {
         "useNamingConvention": "off"
       }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
   }
 }

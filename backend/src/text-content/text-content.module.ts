@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { TextContentController } from './text-content.controller';
+import { TextContentResolver } from './text-content.resolver';
 import { TextContentService } from './text-content.service';
 
 @Module({
-  controllers: [TextContentController],
-  providers: [TextContentService],
+  providers: [TextContentService, TextContentResolver],
   exports: [TextContentService],
 })
 export class TextContentModule {}

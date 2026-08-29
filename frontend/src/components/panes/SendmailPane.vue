@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive } from 'vue';
-import { useContactsStore } from '@/stores/contacts';
-import { useContactFormStore } from '@/stores/contactForm';
-import { useToast } from '@/composables/useToast';
 import CopyButton from '@/components/ui/CopyButton.vue';
+import { useToast } from '@/composables/useToast';
+import { useContactFormStore } from '@/stores/contactForm';
+import { useContactsStore } from '@/stores/contacts';
 
 const contactsStore = useContactsStore();
 const contactFormStore = useContactFormStore();
@@ -14,7 +14,7 @@ onMounted(() => contactsStore.fetch());
 // Псевдо-queue id для "mail log" стиля — детерминированно из id контакта,
 // не случайное, чтобы не прыгало между рендерами.
 function queueId(id: number): string {
-  return (id * 2654435761 % 0xffffff).toString(16).toUpperCase().padStart(6, '0');
+  return ((id * 2654435761) % 0xffffff).toString(16).toUpperCase().padStart(6, '0');
 }
 
 const form = reactive({
@@ -24,9 +24,7 @@ const form = reactive({
 });
 
 const emailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email));
-const isValid = computed(
-  () => form.name.trim().length > 0 && emailValid.value && form.message.trim().length > 0,
-);
+const isValid = computed(() => form.name.trim() && emailValid.value && form.message.trim());
 
 async function onSubmit() {
   if (!isValid.value || contactFormStore.sending) return;

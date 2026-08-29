@@ -1,14 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import type { PrismaService } from '../prisma/prisma.service';
+import type { CreateProjectDto } from './dto/create-project.dto';
+import type { UpdateProjectDto } from './dto/update-project.dto';
+import type { ProjectType } from './graphql/project.type';
 
 @Injectable()
 export class ProjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.project.findMany({ orderBy: { order: 'asc' } });
+  async findAll(): Promise<ProjectType[]> {
+    const projects = await this.prisma.project.findMany({ orderBy: { order: 'asc' } });
+    return projects.map((p) => ({
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      technologies: p.technologies,
+      githubLink: p.githubLink ?? undefined,
+      liveLink: p.liveLink ?? undefined,
+      order: p.order,
+    }));
   }
 
   findOne(id: number) {

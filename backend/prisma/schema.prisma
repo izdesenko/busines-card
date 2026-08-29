@@ -46,3 +46,18 @@ model TextContent {
   key   String @unique
   value String
 }
+
+/// Контакты для секции "Контакты" на визитке (Telegram, Email, GitHub и т.д.)
+model Contact {
+  id    Int    @id @default(autoincrement())
+  /// Тип контакта: telegram, email, github и т.д.
+  type  String
+  /// Текстовая метка (например, "Telegram", "Email")
+  label String
+  /// Значение контакта (username, email, url и т.д.)
+  value String
+  /// Ссылка (для Telegram - t.me/username, для GitHub - github.com/user и т.д.)
+  url   String?
+  /// Порядок отображения на сайте
+  order Int    @default(0)
+}
