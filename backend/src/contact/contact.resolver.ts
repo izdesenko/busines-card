@@ -1,10 +1,9 @@
-import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import type { ContactService } from './contact.service';
-import type { ContactsService } from './contacts.service';
+import { ContactService } from './contact.service';
+import { ContactsService } from './contacts.service';
 import { ContactType } from './graphql/contact.type';
 import { ContactFormResultType } from './graphql/contact-form-result.type';
-import type { CreateContactInput } from './graphql/create-contact.input';
+import { CreateContactInput } from './graphql/create-contact.input';
 
 @Resolver(() => ContactType)
 export class ContactResolver {
@@ -25,9 +24,7 @@ export class ContactResolver {
     name: 'sendContactForm',
     description: 'Отправляет сообщение с формы обратной связи в Telegram',
   })
-  async sendContactForm(
-    @Args('input') input: CreateContactInput,
-  ): Promise<ContactFormResultType> {
+  async sendContactForm(@Args('input') input: CreateContactInput): Promise<ContactFormResultType> {
     return this.contactService.sendToTelegram(input);
   }
 }

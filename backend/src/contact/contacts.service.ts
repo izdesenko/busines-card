@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import type { PrismaService } from '../prisma/prisma.service';
-import type { ContactType } from './graphql/contact.type';
+import { PrismaService } from '../prisma/prisma.service';
+import { ContactType } from './graphql/contact.type';
 
 @Injectable()
 export class ContactsService {

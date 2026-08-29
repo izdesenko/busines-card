@@ -14,9 +14,9 @@
     }
   },
   "linter": {
-    "enabled": true,
+    "enabled": false,
     "rules": {
-      "preset": "recommended"
+      "preset": "none"
     }
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import type { PrismaService } from '../prisma/prisma.service';
-import type { CreateProjectDto } from './dto/create-project.dto';
-import type { UpdateProjectDto } from './dto/update-project.dto';
-import type { ProjectType } from './graphql/project.type';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
+import { ProjectType } from './graphql/project.type';
 
 @Injectable()
 export class ProjectsService {

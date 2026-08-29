@@ -1,6 +1,6 @@
 import { Query, Resolver } from '@nestjs/graphql';
 import { SkillGroupType } from './graphql/skill.type';
-import type { SkillsService } from './skills.service';
+import { SkillsService } from './skills.service';
 
 @Resolver(() => SkillGroupType)
 export class SkillsResolver {

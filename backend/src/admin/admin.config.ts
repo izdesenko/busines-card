@@ -1,9 +1,9 @@
 import { Database, getModelByName, Resource } from '@adminjs/prisma';
-import type { ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import AdminJS from 'adminjs';
 import * as bcrypt from 'bcrypt';
-import type { AuthService } from '../auth/auth.service';
-import type { PrismaService } from '../prisma/prisma.service';
+import { AuthService } from '../auth/auth.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 // Регистрируем Prisma-адаптер один раз при загрузке модуля.
 AdminJS.registerAdapter({ Database, Resource });

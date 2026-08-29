@@ -1,6 +1,6 @@
 import { Query, Resolver } from '@nestjs/graphql';
 import { ProjectType } from './graphql/project.type';
-import type { ProjectsService } from './projects.service';
+import { ProjectsService } from './projects.service';
 
 @Resolver(() => ProjectType)
 export class ProjectsResolver {

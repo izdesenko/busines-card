@@ -1,6 +1,6 @@
 import { Query, Resolver } from '@nestjs/graphql';
 import { TextContentType } from './graphql/text-content.type';
-import type { TextContentService } from './text-content.service';
+import { TextContentService } from './text-content.service';
 
 @Resolver(() => TextContentType)
 export class TextContentResolver {

@@ -1,7 +1,7 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
-import type { PrismaService } from '../prisma/prisma.service';
-import type { UsersService } from '../users/users.service';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../prisma/prisma.service';
+import { UsersService } from '../users/users.service';
 
 const DEFAULT_CONTACTS = [
   {

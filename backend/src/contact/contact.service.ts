@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
-import type { CreateContactDto } from './dto/create-contact.dto';
+import { ConfigService } from '@nestjs/config';
+import { CreateContactDto } from './dto/create-contact.dto';
 
 export interface SendContactResult {
   delivered: boolean;
