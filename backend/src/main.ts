@@ -1,8 +1,6 @@
 import 'reflect-metadata';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import session from 'express-session';
-import passport from 'passport';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -11,25 +9,11 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      transform: true,
       forbidNonWhitelisted: true,
+      transform: true,
+      whitelist: true,
     }),
   );
-
-  // Сессии нужны для passport-local (например, POST /api/auth/login).
-  // Сама AdminJS-панель авторизуется независимо через собственную подписанную
-  // cookie (см. sessionOptions/auth в src/admin/admin.config.ts).
-  app.use(
-    session({
-      secret: process.env.SESSION_SECRET ?? 'dev-session-secret',
-      resave: false,
-      saveUninitialized: false,
-      cookie: { maxAge: 1000 * 60 * 60 * 8 }, // 8 часов
-    }),
-  );
-  app.use(passport.initialize());
-  app.use(passport.session());
 
   app.enableCors();
 

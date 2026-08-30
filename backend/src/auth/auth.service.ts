@@ -8,8 +8,8 @@ export class AuthService {
 
   /**
    * Проверяет логин/пароль администратора по bcrypt-хэшу.
-   * Используется и passport-local стратегией (LocalStrategy), и AdminJS
-   * (см. src/admin/admin.config.ts) — так логика проверки пароля не дублируется.
+   * Используется AdminJS для авторизации в /admin
+   * (см. src/admin/admin.config.ts).
    */
   async validateAdmin(username: string, plainPassword: string) {
     const user = await this.usersService.findByUsername(username);

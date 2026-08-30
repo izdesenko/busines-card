@@ -6,11 +6,11 @@ import { SEND_MESSAGE_SERVICE } from './interfaces/send-message-service.interfac
 import { SendMessageService } from './send-message.service';
 
 @Module({
+  exports: [CONTACT_SERVICE, SEND_MESSAGE_SERVICE],
   providers: [
     { provide: CONTACT_SERVICE, useClass: ContactService },
     { provide: SEND_MESSAGE_SERVICE, useClass: SendMessageService },
     ContactResolver,
   ],
-  exports: [CONTACT_SERVICE, SEND_MESSAGE_SERVICE],
 })
 export class ContactModule {}

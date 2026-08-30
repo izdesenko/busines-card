@@ -1,7 +1,10 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+
+const SALT_ROUNDS = 10;
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -22,7 +25,8 @@ export class SeedService implements OnModuleInit {
     if (userCount === 0) {
       const username = this.config.get<string>('ADMIN_USERNAME', 'admin');
       const password = this.config.get<string>('ADMIN_PASSWORD', 'admin');
-      await this.usersService.create(username, password);
+      const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+      await this.prisma.user.create({ data: { username, password: hashed } });
       this.logger.warn(
         `Таблица User была пуста — создан администратор по умолчанию: "${username}". ` +
           'Обязательно смените пароль после первого входа в /admin ' +
