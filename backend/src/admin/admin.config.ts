@@ -1,5 +1,6 @@
 import { Database, getModelByName, Resource } from '@adminjs/prisma';
 import { ConfigService } from '@nestjs/config';
+import type { User } from '@prisma/client';
 import AdminJS from 'adminjs';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../auth/auth.service';
@@ -33,72 +34,71 @@ export function buildAdminModuleOptions(
     adminJsOptions: {
       rootPath: '/admin',
       branding: {
-        companyName: 'Илья Здесенко — визитка',
+        companyName: 'Онлайн-визитка',
         softwareBrothers: false,
       },
       resources: [
         {
-          resource: { model: getModelByName('Skill'), client: prisma },
+          resource: { client: prisma, model: getModelByName('Skill') },
           options: {
-            navigation: { name: 'Контент сайта', icon: 'Tool' },
+            navigation: { icon: 'Tool', name: 'Контент сайта' },
             properties: {
               category: {
                 availableValues: [
-                  { value: 'Backend', label: 'Backend' },
-                  { value: 'Frontend', label: 'Frontend' },
-                  { value: 'Devops', label: 'Devops' },
-                  { value: 'Database', label: 'Database' },
-                  { value: 'Other', label: 'Other' },
+                  { label: 'AI', value: 'AI' },
+                  { label: 'Backend', value: 'Backend' },
+                  { label: 'Frontend', value: 'Frontend' },
+                  { label: 'Database', value: 'Database' },
+                  { label: 'Devops', value: 'Devops' },
+                  { label: 'Other', value: 'Other' },
                 ],
               },
             },
           },
         },
         {
-          resource: { model: getModelByName('Project'), client: prisma },
+          resource: { client: prisma, model: getModelByName('Project') },
           options: {
-            navigation: { name: 'Контент сайта', icon: 'Grid' },
+            navigation: { icon: 'Grid', name: 'Контент сайта' },
           },
         },
         {
-          resource: { model: getModelByName('TextContent'), client: prisma },
+          resource: { client: prisma, model: getModelByName('TextContent') },
           options: {
-            navigation: { name: 'Контент сайта', icon: 'FileText' },
+            navigation: { icon: 'FileText', name: 'Контент сайта' },
           },
         },
         {
-          resource: { model: getModelByName('Contact'), client: prisma },
+          resource: { client: prisma, model: getModelByName('Contact') },
           options: {
-            navigation: { name: 'Контент сайта', icon: 'Email' },
+            navigation: { icon: 'Email', name: 'Контент сайта' },
           },
         },
         {
-          resource: { model: getModelByName('User'), client: prisma },
+          resource: { client: prisma, model: getModelByName('User') },
           options: {
-            navigation: { name: 'Доступ', icon: 'Lock' },
-            properties: {
-              password: {
-                type: 'password',
-                isVisible: { list: false, show: false, edit: true, filter: false },
-              },
-            },
+            navigation: { icon: 'Lock', name: 'Доступ' },
             actions: {
               // Поле password в форме создания/редактирования всегда
               // автоматически хэшируется bcrypt перед записью в БД.
-              new: { before: [hashPasswordBeforeSave] },
               edit: { before: [hashPasswordBeforeSave] },
+              new: { before: [hashPasswordBeforeSave] },
+            },
+            properties: {
+              password: {
+                isVisible: { edit: true, filter: false, list: false, show: false },
+                type: 'password',
+              },
             },
           },
         },
       ],
     },
     auth: {
-      authenticate: async (username: string, password: string) => {
-        const user = await authService.validateAdmin(username, password);
-        return user ?? null;
-      },
       cookieName: 'admin-session',
       cookiePassword: cookieSecret,
+      authenticate: (username: string, password: string): Promise<Omit<User, 'password'>> =>
+        authService.validateAdmin(username, password),
     },
     sessionOptions: {
       resave: false,

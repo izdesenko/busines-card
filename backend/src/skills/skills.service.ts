@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Skill } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SkillGroupType } from './graphql/skill.type';
 import { ISkillsService } from './interfaces/skills-service.interface';
@@ -14,23 +15,19 @@ export class SkillsService implements ISkillsService {
   }
 
   async findGrouped(): Promise<SkillGroupType[]> {
-    const skills = await this.findAll();
+    const skills: Skill[] = await this.findAll();
     const groups = new Map<string, SkillGroupType>();
 
     for (const skill of skills) {
-      const existing = groups.get(skill.category);
-      if (existing) {
-        existing.skills.push({
-          id: skill.id,
-          name: skill.name,
-          level: skill.level,
-        });
-      } else {
-        groups.set(skill.category, {
+      let existing = groups.get(skill.category);
+      if (!existing) {
+        existing = <SkillGroupType>{
           category: skill.category,
-          skills: [{ id: skill.id, name: skill.name, level: skill.level }],
-        });
+          skills: [],
+        };
+        groups.set(skill.category, existing);
       }
+      existing.skills.push(skill);
     }
 
     return Array.from(groups.values());
