@@ -1,11 +1,12 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsPhoneNumber, IsString, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
 export class CreateContactInput {
   @Field()
   @IsString()
   @MinLength(1)
+  @MaxLength(100)
   name: string = '';
 
   @Field()
@@ -15,10 +16,12 @@ export class CreateContactInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
+  @IsPhoneNumber()
   phone?: string;
 
   @Field()
   @IsString()
   @MinLength(1)
+  @MaxLength(1000)
   message: string = '';
 }

@@ -3,30 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 
-const DEFAULT_CONTACTS = [
-  {
-    type: 'telegram',
-    label: 'Telegram',
-    value: '@ilyazdesenko',
-    url: 'https://t.me/ilyazdesenko',
-    order: 1,
-  },
-  {
-    type: 'email',
-    label: 'Email',
-    value: 'ilya@zdesenko.dev',
-    url: 'mailto:ilya@zdesenko.dev',
-    order: 2,
-  },
-  {
-    type: 'github',
-    label: 'GitHub',
-    value: 'github.com/ilyazdesenko',
-    url: 'https://github.com/ilyazdesenko',
-    order: 3,
-  },
-];
-
 @Injectable()
 export class SeedService implements OnModuleInit {
   private readonly logger = new Logger(SeedService.name);
@@ -57,8 +33,20 @@ export class SeedService implements OnModuleInit {
     // Заполняем контакты по умолчанию, если таблица Contact пуста.
     const contactCount = await this.prisma.contact.count();
     if (contactCount === 0) {
-      await this.prisma.contact.createMany({ data: DEFAULT_CONTACTS });
-      this.logger.log('Заполнена таблица Contact дефолтными данными.');
+      const contactsJson = this.config.get<string>('DEFAULT_CONTACTS', '[]');
+      let defaultContacts = [];
+      try {
+        defaultContacts = JSON.parse(contactsJson);
+      } catch (e) {
+        this.logger.error('DEFAULT_CONTACTS в .env содержит некорректный JSON');
+      }
+
+      if (Array.isArray(defaultContacts) && defaultContacts.length > 0) {
+        await this.prisma.contact.createMany({ data: defaultContacts });
+        this.logger.log('Заполнена таблица Contact дефолтными данными из конфигурации.');
+      } else {
+        this.logger.log('Таблица Contact останется пустой (DEFAULT_CONTACTS пустой или не задан).');
+      }
     }
   }
 }

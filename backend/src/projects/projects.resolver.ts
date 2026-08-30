@@ -1,10 +1,13 @@
+import { Inject } from '@nestjs/common';
 import { Query, Resolver } from '@nestjs/graphql';
 import { ProjectType } from './graphql/project.type';
-import { ProjectsService } from './projects.service';
+import { IProjectsService, PROJECTS_SERVICE } from './interfaces/projects-service.interface';
 
 @Resolver(() => ProjectType)
 export class ProjectsResolver {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(
+    @Inject(PROJECTS_SERVICE) private readonly projectsService: IProjectsService,
+  ) {}
 
   @Query(() => [ProjectType], {
     name: 'getProjects',

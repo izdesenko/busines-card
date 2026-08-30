@@ -1,10 +1,16 @@
+import { Inject } from '@nestjs/common';
 import { Query, Resolver } from '@nestjs/graphql';
 import { TextContentType } from './graphql/text-content.type';
-import { TextContentService } from './text-content.service';
+import {
+  ITextContentService,
+  TEXT_CONTENT_SERVICE,
+} from './interfaces/text-content-service.interface';
 
 @Resolver(() => TextContentType)
 export class TextContentResolver {
-  constructor(private readonly textContentService: TextContentService) {}
+  constructor(
+    @Inject(TEXT_CONTENT_SERVICE) private readonly textContentService: ITextContentService,
+  ) {}
 
   @Query(() => [TextContentType], {
     name: 'getTextContents',
