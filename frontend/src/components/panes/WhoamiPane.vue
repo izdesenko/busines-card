@@ -25,11 +25,11 @@ onMounted(() => textContent.fetch());
           v-if="textContent.loading && !textContent.loaded"
           class="text-faint"
         >…</span>
-        <span v-else>{{ textContent.get('hero_title', 'Илья Здесенко') }}</span>
+        <span v-else>{{ textContent.get('hero_title', 'root') }}</span>
       </div>
 
       <p class="font-display font-medium text-[15px] sm:text-lg text-amber mb-6">
-        {{ textContent.get('hero_role', 'Software Developer') }}
+        {{ textContent.get('hero_role', 'root') }}
       </p>
 
       <p class="text-sm text-dim mb-1 mt-1.5"><span class="text-mint">$</span> cat about.txt</p>

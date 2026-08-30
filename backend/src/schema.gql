@@ -63,7 +63,7 @@ type Skill {
 }
 
 type SkillGroup {
-  """Backend | Frontend | Devops | Other"""
+  """Backend | Frontend | Devops | Database | Other"""
   category: String!
   skills: [Skill!]!
 }

@@ -14,7 +14,7 @@ export class SkillType {
 
 @ObjectType('SkillGroup')
 export class SkillGroupType {
-  @Field({ description: 'Backend | Frontend | Devops | Other' })
+  @Field({ description: 'Backend | Frontend | Devops | Database | Other' })
   category: string = '';
 
   @Field(() => [SkillType])

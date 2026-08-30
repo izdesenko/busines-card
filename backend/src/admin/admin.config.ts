@@ -47,6 +47,7 @@ export function buildAdminModuleOptions(
                   { value: 'Backend', label: 'Backend' },
                   { value: 'Frontend', label: 'Frontend' },
                   { value: 'Devops', label: 'Devops' },
+                  { value: 'Database', label: 'Database' },
                   { value: 'Other', label: 'Other' },
                 ],
               },
