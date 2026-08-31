@@ -41,6 +41,30 @@
   opacity: 0;
 }
 
+/* Скроллбар в терминальном стиле */
+::-webkit-scrollbar {
+  width: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #10161d;
+}
+::-webkit-scrollbar-thumb {
+  background: #1b232c;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a3544;
+}
+::-webkit-scrollbar-corner {
+  background: #10161d;
+}
+
+/* Скроллбар для Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1b232c #10161d;
+}
+
 /* Toast-уведомления */
 .toast-enter-active,
 .toast-leave-active {

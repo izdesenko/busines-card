@@ -83,7 +83,7 @@ onBeforeUnmount(() => timer && clearTimeout(timer));
     </div>
 
     <!-- Активная "панель" tmux -->
-    <div class="relative">
+    <div class="relative h-[min(540px,70vh)] overflow-y-auto">
       <slot />
     </div>
   </div>
