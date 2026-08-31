@@ -2,16 +2,6 @@
   "$schema": "https://biomejs.dev/schemas/latest/schema.json",
   "extends": "//",
   "formatter": { "formatWithErrors": true },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "preset": "recommended",
-      "style": {
-        "useImportType": "off",
-        "useNamingConvention": "off"
-      }
-    }
-  },
   "assist": {
     "enabled": true,
     "actions": {
@@ -23,6 +13,16 @@
   "javascript": {
     "parser": {
       "unsafeParameterDecoratorsEnabled": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        "useImportType": "off",
+        "useNamingConvention": "off"
+      }
     }
   }
 }
