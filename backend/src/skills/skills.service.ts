@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Skill } from '@prisma/client';
+import type { Skill } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SkillGroupType } from './graphql/skill.type';
 import { ISkillsService } from './interfaces/skills-service.interface';
@@ -10,30 +10,42 @@ export class SkillsService implements ISkillsService {
 
   findAll() {
     return this.prisma.skill.findMany({
-      orderBy: [{ category: 'asc' }, { name: 'asc' }],
+      include: { category: true },
+      orderBy: [{ name: 'asc' }],
     });
   }
 
   async findGrouped(): Promise<SkillGroupType[]> {
-    const skills: Skill[] = await this.findAll();
-    const groups = new Map<string, SkillGroupType>();
+    const skills = await this.findAll();
+    const groups = new Map<number, SkillGroupType>();
 
     for (const skill of skills) {
-      let existing = groups.get(skill.category);
+      let existing = groups.get(skill.category.id);
       if (!existing) {
-        existing = <SkillGroupType>{
-          category: skill.category,
+        existing = {
+          category: skill.category.name,
           skills: [],
         };
-        groups.set(skill.category, existing);
+        groups.set(skill.category.id, existing);
       }
-      existing.skills.push(skill);
+      existing.skills.push({
+        id: skill.id,
+        level: skill.level,
+        name: skill.name,
+      });
     }
 
-    return Array.from(groups.values());
+    // Sort groups by category order
+    const sorted = Array.from(groups.values()).sort((a, b) => {
+      const catA = skills.find((s) => s.category.name === a.category)?.category.order ?? 999;
+      const catB = skills.find((s) => s.category.name === b.category)?.category.order ?? 999;
+      return catA - catB;
+    });
+
+    return sorted;
   }
 
   findOne(id: number) {
-    return this.prisma.skill.findUnique({ where: { id } });
+    return this.prisma.skill.findUnique({ include: { category: true }, where: { id } });
   }
 }

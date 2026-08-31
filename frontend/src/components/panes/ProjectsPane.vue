@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useProjectsStore } from '@/stores/projects';
+import { useTextContentStore } from '@/stores/textContent';
 
 const projectsStore = useProjectsStore();
-onMounted(() => projectsStore.fetch());
+const textContent = useTextContentStore();
+onMounted(() => {
+  projectsStore.fetch();
+  textContent.fetch();
+});
 
 function techList(technologies: string): string[] {
   return technologies
@@ -17,18 +22,18 @@ function techList(technologies: string): string[] {
   <div class="p-6 sm:p-7">
     <template v-if="projectsStore.error">
       <p class="text-sm text-coral">{{ projectsStore.error }}</p>
-      <button type="button" class="btn mt-3" @click="projectsStore.fetch()">повторить</button>
+      <button type="button" class="btn mt-3" @click="projectsStore.fetch()">{{ textContent.get('btn_retry', 'повторить') }}</button>
     </template>
 
     <template v-else-if="projectsStore.loading && !projectsStore.loaded">
-      <p class="text-xs text-faint">сканирование директории…</p>
+      <p class="text-xs text-faint">{{ textContent.get('prompt_loading', 'сканирование директории…') }}</p>
     </template>
 
     <template v-else>
-      <p class="text-sm text-dim mb-4"><span class="text-mint">$</span> ls -la ~/projects</p>
+      <p class="text-sm text-dim mb-4"><span class="text-mint">$</span> {{ textContent.get('prompt_projects', 'ls -la ~/projects') }}</p>
 
       <p v-if="projectsStore.items.length === 0" class="text-sm text-faint">
-        drwxr-xr-x  пусто — проекты ещё не добавлены в админке.
+        {{ textContent.get('prompt_empty_projects', 'drwxr-xr-x  пусто — проекты ещё не добавлены в админке.') }}
       </p>
 
       <div
@@ -61,7 +66,7 @@ function techList(technologies: string): string[] {
             rel="noopener"
             class="text-dim hover:text-mint border-b border-transparent hover:border-mintDim transition-colors"
           >
-            github ↗
+            {{ textContent.get('link_github', 'github ↗') }}
           </a>
           <a
             v-if="project.liveLink"
@@ -70,7 +75,7 @@ function techList(technologies: string): string[] {
             rel="noopener"
             class="text-dim hover:text-mint border-b border-transparent hover:border-mintDim transition-colors"
           >
-            live ↗
+            {{ textContent.get('link_live', 'live ↗') }}
           </a>
         </div>
       </div>

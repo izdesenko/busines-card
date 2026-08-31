@@ -17,14 +17,22 @@ model User {
   @@index([username])
 }
 
+/// Категория навыка
+model SkillCategory {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  order Int    @default(0)
+  skills Skill[]
+}
+
 /// Навык для секции "Skills" на визитке
 model Skill {
-  id       Int    @id @default(autoincrement())
-  /// 'Backend' | 'Frontend' | 'Devops' | 'Other'
-  category String
-  name     String
+  id            Int    @id @default(autoincrement())
+  category      SkillCategory @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  name          String
   /// Уровень владения, 1..100
-  level    Int
+  level         Int
 }
 
 /// Проект в портфолио

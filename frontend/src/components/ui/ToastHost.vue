@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { useToast } from '@/composables/useToast';
+import { useTextContentStore } from '@/stores/textContent';
 
 const { toasts, remove } = useToast();
+const textContent = useTextContentStore();
+onMounted(() => textContent.fetch());
 </script>
 
 <template>
@@ -15,7 +19,7 @@ const { toasts, remove } = useToast();
         role="status"
         @click="remove(t.id)"
       >
-        <span class="mr-1.5">{{ t.type === 'success' ? '✓' : '✕' }}</span>{{ t.message }}
+        <span class="mr-1.5">{{ t.type === 'success' ? textContent.get('toast_icon_success', '✓') : textContent.get('toast_icon_error', '✕') }}</span>{{ t.message }}
       </div>
     </TransitionGroup>
   </div>

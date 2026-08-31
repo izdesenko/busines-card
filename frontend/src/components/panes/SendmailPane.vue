@@ -4,12 +4,17 @@ import CopyButton from '@/components/ui/CopyButton.vue';
 import { useToast } from '@/composables/useToast';
 import { useContactFormStore } from '@/stores/contactForm';
 import { useContactsStore } from '@/stores/contacts';
+import { useTextContentStore } from '@/stores/textContent';
 
 const contactsStore = useContactsStore();
 const contactFormStore = useContactFormStore();
+const textContent = useTextContentStore();
 const toast = useToast();
 
-onMounted(() => contactsStore.fetch());
+onMounted(() => {
+  contactsStore.fetch();
+  textContent.fetch();
+});
 
 // Псевдо-queue id для "mail log" стиля — детерминированно из id контакта,
 // не случайное, чтобы не прыгало между рендерами.
@@ -18,9 +23,9 @@ function queueId(id: number): string {
 }
 
 const form = reactive({
-  name: '',
   email: '',
   message: '',
+  name: '',
 });
 
 const emailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email));
@@ -31,25 +36,35 @@ async function onSubmit() {
 
   try {
     const result = await contactFormStore.submit({
-      name: form.name.trim(),
       email: form.email.trim(),
       message: form.message.trim(),
+      name: form.name.trim(),
     });
 
     if (result.delivered) {
-      toast.push('250 2.0.0 OK — сообщение доставлено', 'success');
+      toast.push(
+        textContent.get('text_smtp_delivered', '250 2.0.0 OK — сообщение доставлено'),
+        'success',
+      );
     } else {
-      // Бэкенд принял запрос, но TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID не настроены —
-      // сообщение просто залогировано на сервере (см. ContactService).
-      toast.push('451 сообщение принято, но Telegram не настроен на бэкенде', 'error');
+      toast.push(
+        textContent.get(
+          'text_smtp_no_telegram',
+          '451 сообщение принято, но Telegram не настроен на бэкенде',
+        ),
+        'error',
+      );
     }
 
     form.name = '';
     form.email = '';
     form.message = '';
   } catch (e) {
-    const msg = e instanceof Error ? e.message : 'Не удалось отправить сообщение';
-    toast.push(`550 ${msg}`, 'error');
+    const errMsg =
+      e instanceof Error
+        ? e.message
+        : textContent.get('text_error_sending_message', 'Не удалось отправить сообщение');
+    toast.push(`${textContent.get('text_smtp_error', '550')} ${errMsg}`, 'error');
   }
 }
 </script>
@@ -59,11 +74,11 @@ async function onSubmit() {
     <!-- Список контактов в стиле лога почтовой очереди -->
     <template v-if="contactsStore.error">
       <p class="text-sm text-coral">{{ contactsStore.error }}</p>
-      <button type="button" class="btn mt-2" @click="contactsStore.fetch()">повторить</button>
+      <button type="button" class="btn mt-2" @click="contactsStore.fetch()">{{ textContent.get('btn_retry', 'повторить') }}</button>
     </template>
 
     <template v-else-if="contactsStore.loading && !contactsStore.loaded">
-      <p class="text-xs text-faint mb-4">подключение к очереди…</p>
+      <p class="text-xs text-faint mb-4">{{ textContent.get('prompt_queue', 'подключение к очереди…') }}</p>
     </template>
 
     <template v-else>
@@ -85,7 +100,7 @@ async function onSubmit() {
             {{ contact.value }}
           </a>
           <span v-else class="break-all max-[640px]:order-2 max-[640px]:col-span-2">{{ contact.value }}</span>
-          <span class="text-mint text-xs whitespace-nowrap max-[640px]:order-3">250 delivered</span>
+          <span class="text-mint text-xs whitespace-nowrap max-[640px]:order-3">{{ textContent.get('text_smtp_queue_delivered', '250 delivered') }}</span>
           <CopyButton :value="contact.value" class="max-[640px]:order-3" />
         </div>
       </div>
@@ -93,47 +108,47 @@ async function onSubmit() {
 
     <!-- Форма обратной связи, стилизованная под команду swaks -->
     <p class="text-sm text-dim mb-1">
-      <span class="text-mint">$</span> export SENDER_NAME="<input
+      <span class="text-mint">$</span> {{ textContent.get('prompt_sender_name', 'export SENDER_NAME=') }}"<input
         v-model="form.name"
         type="text"
-        placeholder="Ваше имя"
+        :placeholder="textContent.get('prompt_sender_name_placeholder', 'Ваше имя')"
         class="bg-transparent border-b border-borderSoft focus:border-mint outline-none text-text px-1 w-40"
       />"
     </p>
 
-    <p class="text-sm text-dim mb-4"><span class="text-mint">$</span> swaks \</p>
+    <p class="text-sm text-dim mb-4"><span class="text-mint">$</span> {{ textContent.get('prompt_swaks', 'swaks \\') }}</p>
 
     <form
       class="pl-4 border-l-2 border-border space-y-1.5 text-sm font-mono"
       @submit.prevent="onSubmit"
     >
-      <div class="text-dim">--to <span class="text-text">"ilya"</span> \</div>
+      <div class="text-dim">{{ textContent.get('prompt_to', '--to') }} <span class="text-text">"{{ textContent.get('prompt_to_value', 'user') }}" \</span></div>
 
       <div class="text-dim flex flex-wrap items-center gap-1">
-        --from "<input
+        {{ textContent.get('prompt_from', '--from') }} "<input
           v-model="form.email"
           type="email"
-          placeholder="Input your email"
+          :placeholder="textContent.get('prompt_email_placeholder', 'Input your email')"
           class="bg-transparent border-b outline-none text-text px-1 min-w-[190px]"
           :class="form.email && !emailValid ? 'border-coral' : 'border-borderSoft focus:border-mint'"
         />" \
       </div>
 
       <div class="text-dim">
-        --header <span class="text-text">"Subject: Письмо с визитки"</span> \
+        {{ textContent.get('prompt_header', '--header') }} <span class="text-text">"Subject: {{ textContent.get('prompt_email_subject', 'Письмо с визитки') }}"</span> \
       </div>
 
       <div class="text-dim">
-        --body "<textarea
+        {{ textContent.get('prompt_body', '--body') }} "<textarea
           v-model="form.message"
           rows="3"
-          placeholder="Input message"
+          :placeholder="textContent.get('prompt_message_placeholder', 'Input message')"
           class="block w-full bg-transparent border border-borderSoft focus:border-mint outline-none text-text px-2.5 py-1.5 mt-1 rounded-md resize-y"
         ></textarea>"
       </div>
 
       <button type="submit" class="btn mt-1" :disabled="!isValid || contactFormStore.sending">
-        {{ contactFormStore.sending ? 'sending…' : '▶ run' }}
+        {{ contactFormStore.sending ? textContent.get('btn_sending', 'sending…') : textContent.get('btn_submit', '▶ run') }}
       </button>
     </form>
   </div>

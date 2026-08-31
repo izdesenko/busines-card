@@ -6,13 +6,17 @@ import SendmailPane from '@/components/panes/SendmailPane.vue';
 import WhoamiPane from '@/components/panes/WhoamiPane.vue';
 import TmuxWindow from '@/components/TmuxWindow.vue';
 import ToastHost from '@/components/ui/ToastHost.vue';
+import { useTextContentStore } from '@/stores/textContent';
 import type { TmuxTab } from '@/types';
 
+const textContent = useTextContentStore();
+textContent.fetch();
+
 const tabs: TmuxTab[] = [
-  { id: 'whoami', label: 'id' },
-  { id: 'htop', label: 'htop' },
-  { id: 'projects', label: 'ls -la ~/work' },
-  { id: 'sendmail', label: 'sendmail' },
+  { id: 'whoami', label: textContent.get('nav_whoami', 'id') },
+  { id: 'htop', label: textContent.get('nav_htop', 'htop') },
+  { id: 'projects', label: textContent.get('nav_projects', 'ls -la ~/work') },
+  { id: 'sendmail', label: textContent.get('nav_sendmail', 'sendmail') },
 ];
 
 const active = ref('whoami');
@@ -49,8 +53,8 @@ const active = ref('whoami');
       </TmuxWindow>
 
       <div class="flex justify-between text-[11px] text-faint px-1 flex-wrap gap-2">
-        <span>container: ilya-zdesenko:latest</span>
-        <span>restart: unless-stopped</span>
+        <span>container: {{ textContent.get('container_image', 'user:latest') }}</span>
+        <span>restart: {{ textContent.get('container_restart', 'unless-stopped') }}</span>
       </div>
     </div>
 

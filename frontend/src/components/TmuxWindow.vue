@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useTextContentStore } from '@/stores/textContent';
 import type { TmuxTab } from '@/types';
 
 defineProps<{
@@ -8,6 +9,9 @@ defineProps<{
 }>();
 
 const emit = defineEmits<(e: 'update:modelValue', value: string) => void>();
+
+const textContent = useTextContentStore();
+onMounted(() => textContent.fetch());
 
 function select(id: string) {
   emit('update:modelValue', id);
@@ -42,13 +46,13 @@ onBeforeUnmount(() => timer && clearTimeout(timer));
         <span class="w-2.5 h-2.5 rounded-full bg-trafficYellow"></span>
         <span class="w-2.5 h-2.5 rounded-full bg-trafficGreen"></span>
       </div>
-      <span class="text-xs text-faint ml-1">ilya@dev — tmux</span>
+      <span class="text-xs text-faint ml-1">{{ textContent.get('tmux_window_title', 'user@dev — tmux') }}</span>
     </div>
 
     <!-- tmux status/window bar -->
     <div class="flex items-center justify-between bg-surface2 border-b border-borderSoft overflow-x-auto">
       <span class="text-xs font-semibold text-mint px-3 py-2 border-r border-borderSoft whitespace-nowrap">
-        [ilya-zdesenko]
+        {{ textContent.get('tmux_session_label', '[user]') }}
       </span>
 
       <div

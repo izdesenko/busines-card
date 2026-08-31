@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useTextContentStore } from '@/stores/textContent';
 
 const props = defineProps<{ value: string; label?: string }>();
+const textContent = useTextContentStore();
 const copied = ref(false);
+
+onMounted(() => textContent.fetch());
 
 async function copy() {
   try {
     await navigator.clipboard.writeText(props.value);
   } catch {
-    // clipboard API недоступен — просто молча не показываем "copied ✓"
     return;
   }
   copied.value = true;
@@ -18,6 +21,6 @@ async function copy() {
 
 <template>
   <button type="button" class="btn" @click="copy">
-    {{ copied ? 'copied ✓' : (label ?? 'copy') }}
+    {{ copied ? textContent.get('btn_copied', 'copied ✓') : (label ?? textContent.get('btn_copy', 'copy')) }}
   </button>
 </template>

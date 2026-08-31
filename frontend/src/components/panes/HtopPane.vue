@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { useSkillsStore } from '@/stores/skills';
+import { useTextContentStore } from '@/stores/textContent';
 
 const skillsStore = useSkillsStore();
-onMounted(() => skillsStore.fetch());
+const textContent = useTextContentStore();
+onMounted(() => {
+  skillsStore.fetch();
+  textContent.fetch();
+});
 
 const totalSkills = computed(() => skillsStore.groups.reduce((sum, g) => sum + g.skills.length, 0));
 
@@ -17,29 +22,34 @@ const loadAverage = computed(() => {
     100;
   return avg.toFixed(2);
 });
+
+// Шаблон для Tasks-строки с плейсхолдерами {total}, {running}, {load}
+function formatTasks(tpl: string, total: number, load: string): string {
+  return tpl
+    .replace('{total}', String(total))
+    .replace('{running}', String(total))
+    .replace('{load}', load);
+}
 </script>
 
 <template>
   <div class="p-6 sm:p-7">
     <template v-if="skillsStore.error">
       <p class="text-sm text-coral">{{ skillsStore.error }}</p>
-      <button type="button" class="btn mt-3" @click="skillsStore.fetch()">повторить</button>
+      <button type="button" class="btn mt-3" @click="skillsStore.fetch()">{{ textContent.get('btn_retry', 'повторить') }}</button>
     </template>
 
     <template v-else-if="skillsStore.loading && !skillsStore.loaded">
-      <p class="text-xs text-faint">загрузка процессов…</p>
+      <p class="text-xs text-faint">{{ textContent.get('prompt_htop_loading', 'загрузка процессов…') }}</p>
     </template>
 
     <template v-else>
       <p class="text-xs text-faint mb-0.5">
-        Tasks: {{ totalSkills }} total,
-        {{ totalSkills }}
-        running · Load average:
-        {{ loadAverage }}
+        {{ formatTasks(textContent.get('prompt_htop_tasks', 'Tasks: {total} total, {running} running · Load average: {load}'), totalSkills, loadAverage) }}
       </p>
       <p class="text-xs text-faint mb-4">
         Mem <span class="text-mint">[||||||||||||</span><span class="text-border">|||||]</span>
-        занят делом
+        {{ textContent.get('prompt_htop_mem', 'занят делом') }}
       </p>
 
       <div v-for="group in skillsStore.groups" :key="group.category" class="mb-5 last:mb-0">
@@ -50,7 +60,7 @@ const loadAverage = computed(() => {
         <div
           class="grid grid-cols-[46px_1fr_64px] gap-3.5 px-2.5 pb-1.5 text-[11px] tracking-wide text-faint border-b border-borderSoft"
         >
-          <span>PID</span><span>COMMAND</span><span class="text-right">CPU</span>
+          <span>{{ textContent.get('prompt_htop_pid', 'PID') }}</span><span>{{ textContent.get('prompt_htop_command', 'COMMAND') }}</span><span class="text-right">{{ textContent.get('prompt_htop_cpu', 'CPU') }}</span>
         </div>
 
         <div
@@ -74,7 +84,7 @@ const loadAverage = computed(() => {
         </div>
       </div>
 
-      <p v-if="totalSkills === 0" class="text-sm text-faint">Навыки ещё не добавлены в админке.</p>
+      <p v-if="totalSkills === 0" class="text-sm text-faint">{{ textContent.get('prompt_htop_idle', 'Навыки ещё не добавлены в админке.') }}</p>
     </template>
   </div>
 </template>

@@ -2,17 +2,17 @@ import { defineStore } from 'pinia';
 import { gqlClient } from '@/graphql/client';
 import { SEND_CONTACT_FORM } from '@/graphql/mutations';
 import type { ContactFormInput, ContactFormResult } from '@/types';
+import { useTextContentStore } from './textContent';
 
 interface SendContactFormResponse {
   sendContactForm: ContactFormResult;
 }
 
 export const useContactFormStore = defineStore('contactForm', {
-  state: () => ({
-    sending: false,
-    error: null as string | null,
-  }),
   actions: {
+    clearError() {
+      this.error = null;
+    },
     async submit(input: ContactFormInput): Promise<ContactFormResult> {
       this.sending = true;
       this.error = null;
@@ -23,14 +23,19 @@ export const useContactFormStore = defineStore('contactForm', {
         );
         return sendContactForm;
       } catch (e) {
-        this.error = e instanceof Error ? e.message : 'Не удалось отправить сообщение';
+        const textContent = useTextContentStore();
+        this.error =
+          e instanceof Error
+            ? e.message
+            : textContent.get('text_error_sending_message', 'Не удалось отправить сообщение');
         throw e;
       } finally {
         this.sending = false;
       }
     },
-    clearError() {
-      this.error = null;
-    },
   },
+  state: () => ({
+    error: null as string | null,
+    sending: false,
+  }),
 });

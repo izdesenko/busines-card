@@ -1,10 +1,12 @@
 import 'reflect-metadata';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const config = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
   app.useGlobalPipes(
@@ -15,9 +17,13 @@ async function bootstrap() {
     }),
   );
 
-  app.enableCors();
+  const corsOrigin = config.get<string>('CORS_ORIGIN', '*');
+  app.enableCors({
+    credentials: true,
+    origin: corsOrigin === '*' ? true : corsOrigin.split(',').map((o) => o.trim()),
+  });
 
-  const port = process.env.PORT ? Number(process.env.PORT) : 3300;
+  const port = config.get<number>('PORT', 3300);
   await app.listen(port);
 
   logger.log(`🚀 Сервер запущен:     http://localhost:${port}`);

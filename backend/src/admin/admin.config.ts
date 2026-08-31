@@ -9,51 +9,46 @@ import { PrismaService } from '../prisma/prisma.service';
 // Регистрируем Prisma-адаптер один раз при загрузке модуля.
 AdminJS.registerAdapter({ Database, Resource });
 
-const SALT_ROUNDS = 10;
-
-async function hashPasswordBeforeSave(request: any) {
-  if (request.payload?.password) {
-    request.payload.password = await bcrypt.hash(request.payload.password, SALT_ROUNDS);
-  }
-  return request;
-}
-
 /**
  * Конфигурация AdminJS: подключает Prisma-модели Skill, Project, TextContent,
  * Contact и User как ресурсы с автосгенерированным CRUD UI, и защищает /admin
  * логином/паролем через AuthService (bcrypt-проверка).
  */
-export function buildAdminModuleOptions(
+export async function buildAdminModuleOptions(
   prisma: PrismaService,
   authService: AuthService,
   config: ConfigService,
 ) {
   const cookieSecret = config.get<string>('ADMIN_COOKIE_SECRET', 'default-cookie-secret-change-me');
+  const brandName = config.get<string>('ADMIN_BRAND_NAME', 'Онлайн-визитка');
+  const adminRootPath = config.get<string>('ADMIN_ROOT_PATH', '/admin');
+  const saltRounds = Number(config.get<string>('BCRYPT_SALT_ROUNDS', '10'));
+
+  async function hashPasswordBeforeSave(request: any) {
+    if (request.payload?.password) {
+      request.payload.password = await bcrypt.hash(request.payload.password, saltRounds);
+    }
+    return request;
+  }
 
   return {
     adminJsOptions: {
-      rootPath: '/admin',
+      rootPath: adminRootPath,
       branding: {
-        companyName: 'Онлайн-визитка',
+        companyName: brandName,
         softwareBrothers: false,
       },
       resources: [
         {
+          resource: { client: prisma, model: getModelByName('SkillCategory') },
+          options: {
+            navigation: { icon: 'Folder', name: 'Контент сайта' },
+          },
+        },
+        {
           resource: { client: prisma, model: getModelByName('Skill') },
           options: {
             navigation: { icon: 'Tool', name: 'Контент сайта' },
-            properties: {
-              category: {
-                availableValues: [
-                  { label: 'AI', value: 'AI' },
-                  { label: 'Backend', value: 'Backend' },
-                  { label: 'Frontend', value: 'Frontend' },
-                  { label: 'Database', value: 'Database' },
-                  { label: 'Devops', value: 'Devops' },
-                  { label: 'Other', value: 'Other' },
-                ],
-              },
-            },
           },
         },
         {
@@ -79,8 +74,6 @@ export function buildAdminModuleOptions(
           options: {
             navigation: { icon: 'Lock', name: 'Доступ' },
             actions: {
-              // Поле password в форме создания/редактирования всегда
-              // автоматически хэшируется bcrypt перед записью в БД.
               edit: { before: [hashPasswordBeforeSave] },
               new: { before: [hashPasswordBeforeSave] },
             },

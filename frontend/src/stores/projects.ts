@@ -2,18 +2,13 @@ import { defineStore } from 'pinia';
 import { gqlClient } from '@/graphql/client';
 import { GET_PROJECTS } from '@/graphql/queries';
 import type { Project } from '@/types';
+import { useTextContentStore } from './textContent';
 
 interface GetProjectsResponse {
   getProjects: Project[];
 }
 
 export const useProjectsStore = defineStore('projects', {
-  state: () => ({
-    items: [] as Project[],
-    loading: false,
-    loaded: false,
-    error: null as string | null,
-  }),
   actions: {
     async fetch() {
       if (this.loaded || this.loading) return;
@@ -24,10 +19,20 @@ export const useProjectsStore = defineStore('projects', {
         this.items = data.getProjects;
         this.loaded = true;
       } catch (e) {
-        this.error = e instanceof Error ? e.message : 'Не удалось загрузить проекты';
+        const textContent = useTextContentStore();
+        this.error =
+          e instanceof Error
+            ? e.message
+            : textContent.get('text_error_loading_projects', 'Не удалось загрузить проекты');
       } finally {
         this.loading = false;
       }
     },
   },
+  state: () => ({
+    error: null as string | null,
+    items: [] as Project[],
+    loaded: false,
+    loading: false,
+  }),
 });

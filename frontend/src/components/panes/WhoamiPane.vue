@@ -14,11 +14,11 @@ onMounted(() => textContent.fetch());
         type="button"
         class="btn mt-3"
         @click="textContent.fetch()"
-      >повторить</button>
+      >{{ textContent.get('btn_retry', 'повторить') }}</button>
     </template>
 
     <template v-else>
-      <p class="text-sm text-dim mb-1"><span class="text-mint">$</span> whoami</p>
+      <p class="text-sm text-dim mb-1"><span class="text-mint">$</span> {{ textContent.get('prompt_whoami', 'whoami') }}</p>
 
       <div class="font-display font-bold text-3xl sm:text-4xl md:text-[46px] -tracking-tight mb-1 min-h-[1.2em]">
         <span
@@ -32,7 +32,7 @@ onMounted(() => textContent.fetch());
         {{ textContent.get('hero_role', 'root') }}
       </p>
 
-      <p class="text-sm text-dim mb-1 mt-1.5"><span class="text-mint">$</span> cat about.txt</p>
+      <p class="text-sm text-dim mb-1 mt-1.5"><span class="text-mint">$</span> {{ textContent.get('prompt_cat_about', 'cat about.txt') }}</p>
 
       <div
         class="text-[13.5px] leading-relaxed text-dim border-l-2 border-border pl-3.5 max-w-[52ch] [&_p]:mb-2 last:[&_p]:mb-0"

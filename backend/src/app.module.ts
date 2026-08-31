@@ -31,12 +31,12 @@ import { UsersModule } from './users/users.module';
     // Точка входа: POST /api/graphql (см. main.ts — настраивается глобально через
     // GraphQLOptionsFactory и доступно как у Apollo, так и через Insomnia/postman).
     GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
-      playground: true,
+      driver: ApolloDriver,
       introspection: true,
       path: '/api/graphql',
+      playground: true,
+      sortSchema: true,
     }),
 
     // AdminJS 7+ распространяется только как ESM-пакет, а NestJS по умолчанию

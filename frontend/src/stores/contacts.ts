@@ -2,18 +2,13 @@ import { defineStore } from 'pinia';
 import { gqlClient } from '@/graphql/client';
 import { GET_CONTACTS } from '@/graphql/queries';
 import type { Contact } from '@/types';
+import { useTextContentStore } from './textContent';
 
 interface GetContactsResponse {
   getContacts: Contact[];
 }
 
 export const useContactsStore = defineStore('contacts', {
-  state: () => ({
-    items: [] as Contact[],
-    loading: false,
-    loaded: false,
-    error: null as string | null,
-  }),
   actions: {
     async fetch() {
       if (this.loaded || this.loading) return;
@@ -24,10 +19,20 @@ export const useContactsStore = defineStore('contacts', {
         this.items = data.getContacts;
         this.loaded = true;
       } catch (e) {
-        this.error = e instanceof Error ? e.message : 'Не удалось загрузить контакты';
+        const textContent = useTextContentStore();
+        this.error =
+          e instanceof Error
+            ? e.message
+            : textContent.get('text_error_loading_contacts', 'Не удалось загрузить контакты');
       } finally {
         this.loading = false;
       }
     },
   },
+  state: () => ({
+    error: null as string | null,
+    items: [] as Contact[],
+    loaded: false,
+    loading: false,
+  }),
 });
