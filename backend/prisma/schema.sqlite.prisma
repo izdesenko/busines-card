@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Администратор, авторизующийся в /admin
+model User {
+  id       String @id @default(uuid())
+  username String @unique
+  /// bcrypt-хэш, никогда не хранится в открытом виде
+  password String
+
+  @@index([username])
+}
+
+/// Категория навыка
+model SkillCategory {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  order Int    @default(0)
+  skills Skill[]
+}
+
+/// Навык для секции "Skills" на визитке
+model Skill {
+  id            Int    @id @default(autoincrement())
+  category      SkillCategory @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  name          String
+  /// Уровень владения, 1..100
+  level         Int
+}
+
+/// Проект в портфолио
+model Project {
+  id           Int     @id @default(autoincrement())
+  title        String
+  description  String
+  /// Технологии через запятую, например: "NestJS, Prisma, Docker"
+  technologies String
+  githubLink   String?
+  liveLink     String?
+  /// Порядок отображения на сайте
+  order        Int     @default(0)
+}
+
+/// Динамические тексты для главной страницы (hero_title, about_me, ...)
+model TextContent {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
+
+/// Контакты для секции "Контакты" на визитке (Telegram, Email, GitHub и т.д.)
+model Contact {
+  id    Int    @id @default(autoincrement())
+  /// Тип контакта: telegram, email, github и т.д.
+  type  String
+  /// Текстовая метка (например, "Telegram", "Email")
+  label String
+  /// Значение контакта (username, email, url и т.д.)
+  value String
+  /// Ссылка (для Telegram - t.me/username, для GitHub - github.com/user и т.д.)
+  url   String?
+  /// Порядок отображения на сайте
+  order Int    @default(0)
+}
