@@ -1,18 +1,8 @@
 {
-  "name": "dev-card-backend",
-  "version": "0.0.1",
   "description": "Backend для сайта-визитки: NestJS + Prisma + SQLite + AdminJS",
+  "name": "dev-card-backend",
   "private": true,
-  "scripts": {
-    "build": "nest build",
-    "start": "node dist/main",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev --name init",
-    "prisma:deploy": "prisma migrate deploy",
-    "prisma:studio": "prisma studio"
-  },
+  "version": "0.0.1",
   "dependencies": {
     "@adminjs/express": "^6.1.1",
     "@adminjs/nestjs": "^6.1.0",
@@ -34,8 +24,10 @@
     "express-session": "^1.18.0",
     "graphql": "^16.9.0",
     "graphql-tag": "^2.12.7",
+    "mysql2": "^3.24.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -52,5 +44,22 @@
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "nest build",
+    "db:current": "node scripts/switch-db.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:reset": "prisma db push --force-reset",
+    "db:use:mysql": "node scripts/switch-db.js mysql",
+    "db:use:postgres": "node scripts/switch-db.js postgres",
+    "db:use:sqlite": "node scripts/switch-db.js sqlite",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:studio": "prisma studio",
+    "start": "node dist/main",
+    "start:debug": "nest start --debug --watch",
+    "start:dev": "nest start --watch"
   }
 }
