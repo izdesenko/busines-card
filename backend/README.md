@@ -1,23 +1,17 @@
-# Backend сайта-визитки — NestJS + Prisma + SQLite + AdminJS
+# Backend сайта-визитки — NestJS + Prisma + AdminJS + GraphQL
 
-Лёгкий бэкенд для сайта-визитки разработчика с автогенерируемой админ-панелью
-и REST API для фронтенда. Реализован строго по ТЗ: NestJS (TypeScript),
-Prisma ORM + SQLite, AdminJS для CRUD, Passport.js (passport-local + bcrypt)
-для проверки пароля администратора, отправка формы обратной связи в Telegram.
-
-⚠️ **Важно:** этот проект собран в песочнице без доступа в интернет, поэтому
-`npm install` здесь не запускался и код не был скомпилирован/протестирован
-живым запуском. Структура и API написаны по актуальной документации пакетов,
-но перед продакшеном обязательно прогоните шаги ниже локально и почитайте
-свежие changelog'и adminjs/@adminjs-nestjs — это быстро развивающиеся пакеты.
+Лёгкий бэкенд для сайта-визитки разработчика с автогенерируемой админ-панелью и GraphQL API.
+Поддерживает подключение к SQLite (по умолчанию), MySQL и PostgreSQL через переменную `DATABASE_DRIVER`.
 
 ## Стек
 
 - **NestJS** (TypeScript) — фреймворк
-- **Prisma ORM** + **SQLite** (`database.sqlite`, один файл)
+- **Prisma ORM** — ORM с поддержкой SQLite / MySQL / PostgreSQL
+- **SQLite** (`database.sqlite`, один файл) — по умолчанию
 - **AdminJS** (`@adminjs/nestjs` + `@adminjs/prisma`) — автогенерируемая админка на `/admin`
 - **Passport.js** (`@nestjs/passport` + `passport-local` + `bcrypt`) — проверка логина/пароля
-- **class-validator / class-transformer** — валидация DTO
+- **class-validator / class-transformer** — валидация DTO (используется в `CreateContactInput` для формы обратной связи, подключается глобально через `ValidationPipe` в `main.ts`)
+- **@nestjs/graphql** + `apollo-server-express` — GraphQL API
 
 ## Важный технический нюанс: AdminJS и ESM
 
@@ -35,80 +29,111 @@ adminjs на последней CommonJS-совместимой ветке (v6.x
 
 ```
 prisma/
-  schema.prisma          # модели User, Skill, Project, TextContent (SQLite)
+  schema.sqlite.prisma   # шаблон схемы для SQLite
+  schema.mysql.prisma    # шаблон схемы для MySQL
+  schema.postgresql.prisma # шаблон схемы для PostgreSQL
+  schema.prisma          # ← актуальная схема (генерируется скриптом)
 src/
-  main.ts                # bootstrap, сессии, passport, ValidationPipe
-  app.module.ts           # сборка всех модулей + подключение AdminJS
-  prisma/                 # PrismaService (глобальный провайдер)
-  users/                  # UsersService — поиск/создание админа, bcrypt-хэш
-  auth/                   # AuthService, LocalStrategy, session-сериализация
-  skills/                 # GET /api/skills, /api/skills/:id
-  projects/               # GET /api/projects, /api/projects/:id
-  text-content/           # GET /api/content, /api/content/:key
-  contact/                # POST /api/contact → отправка в Telegram
-  seed/                   # SeedService — создаёт админа при первом старте
-  admin/                  # admin.config.ts — конфигурация AdminJS-ресурсов
+  main.ts                # bootstrap, сессии, CORS, ValidationPipe
+  app.module.ts          # сборка всех модулей + динамический импорт AdminJS
+  prisma/                # PrismaService (глобальный провайдер)
+  users/                 # UsersService — поиск/создание админа, bcrypt-хэш
+  auth/                  # AuthService, LocalStrategy, session-сериализация
+  skills/                # SkillsResolver + SkillsService (GraphQL)
+  projects/              # ProjectsResolver + ProjectsService
+  text-content/          # TextContentResolver + TextContentService
+  contact/               # ContactResolver + ContactService + ContactFormService
+  seed/                  # SeedService — создаёт админа и заполняет дефолтные данные
+  admin/                 # admin.config.ts — конфигурация AdminJS-ресурсов
+scripts/
+  switch-db.js           # Переключение между SQLite / MySQL / PostgreSQL
 ```
 
 ## Установка и запуск
 
-1. Установите зависимости (нужен **Node.js 18+**, из-за глобального `fetch`
-   в `contact.service.ts`):
+### 1. Выбор СУБД
 
-   ```bash
-   npm install
-   ```
+По умолчанию используется SQLite (файл `database.sqlite` в корне `prisma/`).
+Для смены драйвера выполните:
 
-2. Скопируйте `.env.example` в `.env` и заполните значения:
+```bash
+# SQLite (по умолчанию)
+npm run db:use:sqlite
 
-   ```bash
-   cp .env.example .env
-   ```
+# MySQL
+npm run db:use:mysql
+# Затем в .env укажи: DATABASE_URL="mysql://user:password@localhost:3306/devcard"
 
-   - `ADMIN_USERNAME` / `ADMIN_PASSWORD` — логин/пароль администратора,
-     который будет автоматически создан при первом старте, если таблица
-     `User` пуста (см. `src/seed/seed.service.ts`).
-   - `SESSION_SECRET`, `ADMIN_COOKIE_SECRET` — замените на случайные строки.
-   - `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` — токен бота от [@BotFather](https://t.me/BotFather)
-     и chat_id получателя (например, узнать свой через [@userinfobot](https://t.me/userinfobot)).
-     Если оставить пустыми — форма обратной связи не упадёт, а просто
-     залогирует сообщение в консоль вместо отправки.
+# PostgreSQL
+npm run db:use:postgres
+# Затем в .env укажи: DATABASE_URL="postgresql://user:password@localhost:5432/devcard"
+```
 
-3. Сгенерируйте Prisma Client и накатите миграцию (создаст `database.sqlite`):
+Скрипт:
+- обновит `DATABASE_DRIVER` в `.env`
+- скопирует нужный `schema.*.prisma` в `schema.prisma`
 
-   ```bash
-   npm run prisma:generate
-   npm run prisma:migrate
-   ```
+### 2. Установка зависимостей и инициализация
 
-4. Запустите в dev-режиме:
+```bash
+npm install
+npx prisma db push    # создаст/обновит БД согласно схеме
+```
 
-   ```bash
-   npm run start:dev
-   ```
+### 3. Запуск в dev-режиме
 
-   При первом старте в консоли появится предупреждение о созданном
-   администраторе по умолчанию.
+```bash
+npm run start:dev
+```
+
+При первом старте в консоли появится предупреждение о созданном
+администраторе по умолчанию (логин/пароль из `.env`).
 
 ## Проверка (Definition of Done из ТЗ)
 
 1. `npm run start:dev` — приложение стартует без ошибок.
-2. `http://localhost:3000/admin` — открывается форма входа AdminJS; пускает
+2. `http://localhost:3300/admin` — открывается форма входа AdminJS; пускает
    только по `ADMIN_USERNAME` / `ADMIN_PASSWORD` (проверка через bcrypt в
    `AuthService.validateAdmin`).
-3. В админке доступен CRUD для `Skill`, `Project`, `TextContent`, `User`
-   (поле `password` в форме `User` при сохранении автоматически хэшируется
-   через bcrypt, см. `hashPasswordBeforeSave` в `admin.config.ts`).
-4. Публичные эндпоинты отдают JSON:
-   - `GET /api/skills`, `GET /api/skills/:id`
-   - `GET /api/projects`, `GET /api/projects/:id`
-   - `GET /api/content`, `GET /api/content/:key`
-   - `POST /api/contact` — тело `{ name, email, phone?, message }`,
-     отправляет сообщение в Telegram-бота.
+3. В админке доступен CRUD для:
+   - `User` (поле `password` хэшируется через bcrypt при сохранении)
+   - `SkillCategory`
+   - `Skill` (с привязкой к категории)
+   - `Project`
+   - `TextContent`
+   - `Contact`
+4. Публичные GraphQL-эндпоинты:
+   - `GET /api/graphql` — GraphQL Playground
+   - `query { getSkills { category skills { id name level } } }` — навыки по категориям
+   - `query { getProjects { id title description technologies githubLink liveLink order } }` — проекты
+   - `query { getTextContents { key value } }` — все UI-строки
+   - `mutation { sendContactForm(input: { name email message }) { delivered } }` — форма обратной связи
 
-## Полезные команды Prisma
+## Полезные команды
 
 ```bash
-npm run prisma:studio   # визуальный браузер по SQLite-базе
-npm run prisma:deploy   # применить миграции в проде (без --create)
+npm run db:use:sqlite   # переключить на SQLite (по умолчанию)
+npm run db:use:mysql    # переключить на MySQL
+npm run db:use:postgres # переключить на PostgreSQL
+npm run db:generate     # сгенерировать Prisma Client после смены драйвера
+npm run db:push         # синхронизировать схему с БД
+npm run db:reset        # сбросить БД (drop + create) — полезно в dev
+npm run db:studio       # визуальный браузер БД (работает только с SQLite)
+npm run start:dev       # dev-сервер с hot-reload
+npm run start           # запуск production-сборки (после npm run build)
+npm run build           # production-сборка (в dist/)
+npm run start:debug     # dev-сервер с отладкой
 ```
+
+## Переменные окружения (.env)
+
+См. `.env.example` — все переменные с комментариями.
+
+**Ключевые:**
+- `DATABASE_DRIVER` — `sqlite` | `mysql` | `postgresql`
+- `DATABASE_URL` — строка подключения (см. шаблоны в `.env.example`)
+- `PORT` — порт сервера (по умолчанию 3300)
+- `CORS_ORIGIN` — origins для CORS, `*` для всех
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD` — логин/пароль администратора
+- `SESSION_SECRET`, `ADMIN_COOKIE_SECRET` — секреты сессий (обязательно в проде)
+- `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` — для отправки писем в Telegram (опционально)
